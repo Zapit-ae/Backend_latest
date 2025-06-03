@@ -60,52 +60,6 @@ app.post('/api/login', (req, res) => {
   });
 });
 
-app.post('/api/register', (req, res) => {
-  const { email, password, phone_number, full_name } = req.body;
-
-  if (!email || !password || !phone_number || !full_name) {
-    return res.status(400).send({
-      status: 400,
-      message: "Missing required fields. Please provide email, password, phone number, and full name.",
-    });
-  }
-
-  const emailRegex = /.+@.+/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).send({
-      status: 400,
-      message: "Invalid email format. Please provide a valid email address.",
-    });
-  }
-
-  const hash = crypto.createHash('md5');
-  hash.update(password);
-  const hashedPassword = hash.digest('hex');
-
-  connection.query('INSERT INTO users (email, password, phone_number, full_name) VALUES (?, ?, ?, ?) RETURNING uuid',
-    [email, hashedPassword, phone_number, full_name], (error, results) => {
-      if (error) {
-        if (error.code === 'ER_DUP_ENTRY') {
-          return res.status(409).send({
-            status: 409,
-            message: "Email already in use",
-          });
-        }
-        console.error('Error inserting user:', error);
-        return res.status(500).send({
-          status: 500,
-          message: "Internal Server Error. Please try again later.",
-        });
-      }
-
-      res.status(201).send({
-        status: 201,
-        message: "User registered successfully",
-        uuid: results[0].uuid,
-      });
-    });
-});
-
 const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
