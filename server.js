@@ -2,8 +2,12 @@ import express from 'express';
 import mysql from 'mysql';
 import crypto from 'crypto';
 
+// read from schema.sql file
+import fs from 'fs';
+const schema = fs.readFileSync('schema.sql', 'utf8');
+
 const app = express();
-const port = 8080;
+const port = 8080; // Default port for MariaDB is 3306
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -20,21 +24,6 @@ connection.connect((err) => {
   }
 });
 
-const schema = `
-CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  uuid VARCHAR(36) NOT NULL UNIQUE DEFAULT (UUID()),
-  email TEXT NOT NULL UNIQUE,
-  password TEXT NOT NULL,
-  phone_number TEXT,
-  full_name TEXT,
-  is_email_verified BOOLEAN DEFAULT FALSE,
-  is_phone_verified BOOLEAN DEFAULT FALSE,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-`;
 
 connection.query(schema);
 
