@@ -7,7 +7,6 @@ import fs from 'fs';
 const schema = fs.readFileSync('schema.sql', 'utf8');
 
 const app = express();
-const port = 8080; // Default port for MariaDB is 3306
 
 const connection = mysql.createConnection({
   host: 'localhost',
@@ -31,11 +30,11 @@ app.use(express.json());
 
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
-
+  
   const hash = crypto.createHash('md5');
   hash.update(password);
   const hashedPassword = hash.digest('hex');
-
+  
   connection.query('SELECT uuid FROM users WHERE password=? AND email=?', [hashedPassword, email], (error, results, fields) => {
     if (error) {
       console.error('Error querying database:', error);
@@ -44,14 +43,14 @@ app.post('/api/login', (req, res) => {
         message: "Internal Server Error. Please try again later.",
       });
     }
-
+    
     if (results.length !== 1) {
       return res.status(404).send({
         status: 404,
         message: "No user with matching email and password found.",
       });
     }
-
+    
     return res.status(200).send({
       status: 200,
       message: "Login successful",
@@ -60,6 +59,7 @@ app.post('/api/login', (req, res) => {
   });
 });
 
+const port = 8080;
 const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
