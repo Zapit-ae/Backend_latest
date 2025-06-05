@@ -11,11 +11,10 @@ const schema = fs.readFileSync('schema.sql', 'utf8');
 
 const app = express();
 
-
 const connection = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '',
+  password: process.env.DB_PASS || 'Akshat123',
   database: process.env.DB_NAME || 'zappit',
   multipleStatements: true
 });
@@ -374,6 +373,97 @@ const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
+// Create a new crypto transaction
+app.post('/crypto-transactions', (req, res) => {
+  const data = req.body;
+  data.crypto_tx_id = uuidv4(); // 👈 generate and assign a unique UUID
+  const sql = `INSERT INTO crypto_transaction SET ?`;
+  connection.query(sql, data, (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).send({ message: "it is added, code 200",id: data.crypto_tx_id, ...data });
+  });
+});
+
+// Get all transactions
+app.get('/crypto-transactions', (req, res) => {
+  connection.query('SELECT * FROM crypto_transaction', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.send({results, message: "code 200"});
+  });
+});
+
+// Update a transaction
+app.put('/crypto-transactions/:id', (req, res) => {
+  connection.query('UPDATE crypto_transaction SET ? WHERE crypto_tx_id = ?', [req.body, req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Transaction updated successfully, code 200' });
+  });
+});
+
+// Delete a transaction
+app.delete('/crypto-transactions/:id', (req, res) => {
+  connection.query('DELETE FROM crypto_transaction WHERE crypto_tx_id = ?', [req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Transaction deleted successfully, code 200' });
+  });
+});
+
+
+
+//activity_log
+// Create activity log 
+app.post('/activity_log', (req, res) => {
+  const log = req.body;
+  log.id = uuidv4();
+  const sql = 'INSERT INTO activity_log SET ?';
+  connection.query(sql, log, (err, result) => {
+    if (err) return res.status(500).send({
+      status: 500,
+      message: "Internal Server Error. Please try again later.",});
+    res.send({ 
+    Status: 200,
+    message: 'Activity log added , code 200', id: log.id });
+  });
+});
+
+//Read (Get All Logs)
+app.get('/activity_log', (req, res) => {
+  connection.query('SELECT * FROM activity_log', (err, results) => {
+    if (err) return res.status(500).send(err.message);
+    res.send(results);
+  });
+});
+
+//Read (Get One Log by ID)
+app.get('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query('SELECT * FROM activity_log WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    if (result.length === 0) return res.status(404).send('Log not found');
+    res.send(result[0]);
+  });
+});
+
+// Update activity log
+app.put('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  const updatedLog = req.body;
+  connection.query('UPDATE activity_log SET ? WHERE id = ?', [updatedLog, id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    res.send('Log updated');
+  });
+});
+
+//Delete activity log
+app.delete('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query('DELETE FROM activity_log WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    res.send('Log deleted');
+  });
+});
+
+
 // handle graceful shutdown
 function shutdown() {
   server.close(() => {
@@ -384,3 +474,108 @@ function shutdown() {
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+// Create an RTA ticket
+app.post('/api/rta-ticket', (req, res) => {
+  const {
+    customeruu_id,
+    rta_route,
+    start_location,
+    end_location,
+    ticket_time,
+    transaction_id  
+  } = req.body;
+
+  const ticket_id = crypto.randomUUID();
+
+  const formattedTicketTime = ticket_time
+    ? ticket_time.replace('T', ' ').replace('Z', '')
+    : null;
+
+  connection.query(
+    `INSERT INTO rta_ticket 
+      (ticket_id, customeruu_id, rta_route, start_location, end_location, ticket_time, transaction_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [ticket_id, customeruu_id, rta_route, start_location, end_location, formattedTicketTime, transaction_id],
+    (err, result) => {
+      if (err) {
+        console.error('Error creating ticket:', err);
+        return res.status(500).json({ error: 420, message: 'Internal server error' });
+      }
+      res.status(201).json({ success: 200, message: 'RTA ticket created', ticket_id });
+    }
+  );
+});
+
+// Read all RTA tickets
+app.get('/api/rta-ticket', (req, res) => {
+  connection.query('SELECT * FROM rta_ticket', (err, results) => {
+    if (err) {
+      console.error('Error fetching RTA tickets:', err);
+      return res.status(500).json({ error: 420, message: 'Internal server error' });
+    }
+    res.status(200).json({ success: 200, message: 'RTA tickets fetched', data: results });
+  });
+});
+
+// Read one RTA ticket by ID
+app.get('/api/rta-ticket/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('SELECT * FROM rta_ticket WHERE ticket_id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Error fetching RTA ticket:', err);
+      return res.status(500).json({ error: 420, message: 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 420, message: 'RTA ticket not found' });
+    }
+    res.status(200).json({ success: 200, message: 'RTA ticket fetched', data: results[0] });
+  });
+});
+
+// Update an RTA ticket by ID
+app.put('/api/rta-ticket/:ticket_id', (req, res) => {
+  const ticketId = req.params.ticket_id;
+  const { rta_route, start_location, end_location, ticket_time } = req.body;
+
+  let formattedTicketTime = null;
+  if (ticket_time) {
+    const dateObj = new Date(ticket_time);
+    if (isNaN(dateObj)) {
+      return res.status(400).json({ error: 420, message: "Invalid date format for ticket_time" });
+    }
+    formattedTicketTime = dateObj.toISOString().slice(0, 19).replace('T', ' ');
+  }
+
+  const sql = `
+    UPDATE rta_ticket
+    SET rta_route = ?, start_location = ?, end_location = ?, ticket_time = ?
+    WHERE ticket_id = ?
+  `;
+
+  connection.query(sql, [rta_route, start_location, end_location, formattedTicketTime, ticketId], (err, result) => {
+    if (err) {
+      console.error("Error updating RTA ticket:", err);
+      return res.status(500).json({ error: 420, message: "Database error while updating ticket" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 420, message: "Ticket not found" });
+    }
+    res.json({ success: 200, message: "Ticket updated successfully" });
+  });
+});
+
+// Delete an RTA ticket by ID
+app.delete('/api/rta-ticket/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM rta_ticket WHERE ticket_id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting RTA ticket:', err);
+      return res.status(500).json({ error: 420, message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 420, message: 'RTA ticket not found' });
+    }
+    res.status(200).json({ success: 200, message: 'RTA ticket deleted successfully' });
+  });
+});
