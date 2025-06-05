@@ -11,12 +11,12 @@ const schema = fs.readFileSync('schema.sql', 'utf8');
 
 const app = express();
 
-
 const connection = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || 'Akshat123',
   database: process.env.DB_NAME || 'zappit',
+  multipleStatements: true, // allow multiple statements for schema creation
 });
 
 connection.connect((err) => {
@@ -205,10 +205,182 @@ app.delete('/api/transactions/:id', (req, res) => {
   );
 });
 
+// CREATE a payment method
+app.post('/api/payment-method', (req, res) => {
+  const { customer_uuid, type, label, details, is_active } = req.body;
+  connection.query(
+    'INSERT INTO payment_method (customer_uuid, type, label, details, is_active) VALUES (?, ?, ?, ?, ?)',
+    [customer_uuid, type, label, JSON.stringify(details), is_active ?? true],
+    (err, result) => {
+      if (err) {
+        console.error('Error inserting payment method:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      res.status(201).json({
+        payment_id: result.insertId,
+        message: 'Payment method created'
+      });
+    }
+  );
+});
+
+// READ all payment methods
+app.get('/api/payment-method', (req, res) => {
+  connection.query('SELECT * FROM payment_method', (err, results) => {
+    if (err) {
+      console.error('Error fetching payment methods:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+// READ one payment method by ID
+app.get('/api/payment-method/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('SELECT * FROM payment_method WHERE payment_id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Error fetching payment method:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Payment method not found' });
+    }
+    res.status(200).json(results[0]);
+  });
+});
+
+// UPDATE a payment method
+app.put('/api/payment-method/:id', (req, res) => {
+  const { id } = req.params;
+  const { type, label, details, is_active } = req.body;
+
+  connection.query(
+    'UPDATE payment_method SET type = ?, label = ?, details = ?, is_active = ? WHERE payment_id = ?',
+    [type, label, JSON.stringify(details), is_active, id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating payment method:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Payment method not found' });
+      }
+      res.status(200).json({ message: 'Payment method updated' });
+    }
+  );
+});
+
+// DELETE a payment method
+app.delete('/api/payment-method/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM payment_method WHERE payment_id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting payment method:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Payment method not found' });
+    }
+    res.status(200).json({ message: 'Payment method deleted' });
+  });
+});
+
 const port = 8080;
 const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
+
+// Create a new crypto transaction
+app.post('/crypto-transactions', (req, res) => {
+  const data = req.body;
+  data.crypto_tx_id = uuidv4(); // 👈 generate and assign a unique UUID
+  const sql = `INSERT INTO crypto_transaction SET ?`;
+  connection.query(sql, data, (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).send({ message: "it is added, code 200",id: data.crypto_tx_id, ...data });
+  });
+});
+
+// Get all transactions
+app.get('/crypto-transactions', (req, res) => {
+  connection.query('SELECT * FROM crypto_transaction', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.send({results, message: "code 200"});
+  });
+});
+
+// Update a transaction
+app.put('/crypto-transactions/:id', (req, res) => {
+  connection.query('UPDATE crypto_transaction SET ? WHERE crypto_tx_id = ?', [req.body, req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Transaction updated successfully, code 200' });
+  });
+});
+
+// Delete a transaction
+app.delete('/crypto-transactions/:id', (req, res) => {
+  connection.query('DELETE FROM crypto_transaction WHERE crypto_tx_id = ?', [req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Transaction deleted successfully, code 200' });
+  });
+});
+
+
+
+//activity_log
+// Create activity log 
+app.post('/activity_log', (req, res) => {
+  const log = req.body;
+  log.id = uuidv4();
+  const sql = 'INSERT INTO activity_log SET ?';
+  connection.query(sql, log, (err, result) => {
+    if (err) return res.status(500).send({
+      status: 500,
+      message: "Internal Server Error. Please try again later.",});
+    res.send({ 
+    Status: 200,
+    message: 'Activity log added , code 200', id: log.id });
+  });
+});
+
+//Read (Get All Logs)
+app.get('/activity_log', (req, res) => {
+  connection.query('SELECT * FROM activity_log', (err, results) => {
+    if (err) return res.status(500).send(err.message);
+    res.send(results);
+  });
+});
+
+//Read (Get One Log by ID)
+app.get('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query('SELECT * FROM activity_log WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    if (result.length === 0) return res.status(404).send('Log not found');
+    res.send(result[0]);
+  });
+});
+
+// Update activity log
+app.put('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  const updatedLog = req.body;
+  connection.query('UPDATE activity_log SET ? WHERE id = ?', [updatedLog, id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    res.send('Log updated');
+  });
+});
+
+//Delete activity log
+app.delete('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query('DELETE FROM activity_log WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    res.send('Log deleted');
+  });
+});
+
 
 // handle graceful shutdown
 function shutdown() {
