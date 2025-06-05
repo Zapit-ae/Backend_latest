@@ -291,6 +291,43 @@ const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
 
+// Create a new crypto transaction
+app.post('/crypto-transactions', (req, res) => {
+  const data = req.body;
+  data.crypto_tx_id = uuidv4(); // 👈 generate and assign a unique UUID
+  const sql = `INSERT INTO crypto_transaction SET ?`;
+  connection.query(sql, data, (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).send({ message: "it is added, code 200",id: data.crypto_tx_id, ...data });
+  });
+});
+
+// Get all transactions
+app.get('/crypto-transactions', (req, res) => {
+  connection.query('SELECT * FROM crypto_transaction', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.send({results, message: "code 200"});
+  });
+});
+
+// Update a transaction
+app.put('/crypto-transactions/:id', (req, res) => {
+  connection.query('UPDATE crypto_transaction SET ? WHERE crypto_tx_id = ?', [req.body, req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Transaction updated successfully, code 200' });
+  });
+});
+
+// Delete a transaction
+app.delete('/crypto-transactions/:id', (req, res) => {
+  connection.query('DELETE FROM crypto_transaction WHERE crypto_tx_id = ?', [req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Transaction deleted successfully, code 200' });
+  });
+});
+
+
+
 // handle graceful shutdown
 function shutdown() {
   server.close(() => {

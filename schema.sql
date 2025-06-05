@@ -35,3 +35,14 @@ CREATE TABLE IF NOT EXISTS payment_method (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
+
+CREATE TABLE IF NOT EXISTS crypto_transaction (
+  crypto_tx_id UUID PRIMARY KEY,
+  customer_uuid UUID,
+  transaction_id UUID,
+  tx_hash VARCHAR(255),
+  network VARCHAR(255),
+  crypto_type VARCHAR(255),
+  wallet_address VARCHAR(255),
+  status VARCHAR(20)
+);
