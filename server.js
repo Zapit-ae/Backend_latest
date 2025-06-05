@@ -205,6 +205,87 @@ app.delete('/api/transactions/:id', (req, res) => {
   );
 });
 
+// CREATE a payment method
+app.post('/api/payment-method', (req, res) => {
+  const { customer_uuid, type, label, details, is_active } = req.body;
+  connection.query(
+    'INSERT INTO payment_method (customer_uuid, type, label, details, is_active) VALUES (?, ?, ?, ?, ?)',
+    [customer_uuid, type, label, JSON.stringify(details), is_active ?? true],
+    (err, result) => {
+      if (err) {
+        console.error('Error inserting payment method:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      res.status(201).json({
+        payment_id: result.insertId,
+        message: 'Payment method created'
+      });
+    }
+  );
+});
+
+// READ all payment methods
+app.get('/api/payment-method', (req, res) => {
+  connection.query('SELECT * FROM payment_method', (err, results) => {
+    if (err) {
+      console.error('Error fetching payment methods:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+// READ one payment method by ID
+app.get('/api/payment-method/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('SELECT * FROM payment_method WHERE payment_id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Error fetching payment method:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Payment method not found' });
+    }
+    res.status(200).json(results[0]);
+  });
+});
+
+// UPDATE a payment method
+app.put('/api/payment-method/:id', (req, res) => {
+  const { id } = req.params;
+  const { type, label, details, is_active } = req.body;
+
+  connection.query(
+    'UPDATE payment_method SET type = ?, label = ?, details = ?, is_active = ? WHERE payment_id = ?',
+    [type, label, JSON.stringify(details), is_active, id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating payment method:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Payment method not found' });
+      }
+      res.status(200).json({ message: 'Payment method updated' });
+    }
+  );
+});
+
+// DELETE a payment method
+app.delete('/api/payment-method/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM payment_method WHERE payment_id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting payment method:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Payment method not found' });
+    }
+    res.status(200).json({ message: 'Payment method deleted' });
+  });
+});
+
 const port = 8080;
 const server = app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
