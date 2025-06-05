@@ -328,6 +328,60 @@ app.delete('/crypto-transactions/:id', (req, res) => {
 
 
 
+//activity_log
+// Create activity log 
+app.post('/activity_log', (req, res) => {
+  const log = req.body;
+  log.id = uuidv4();
+  const sql = 'INSERT INTO activity_log SET ?';
+  connection.query(sql, log, (err, result) => {
+    if (err) return res.status(500).send({
+      status: 500,
+      message: "Internal Server Error. Please try again later.",});
+    res.send({ 
+    Status: 200,
+    message: 'Activity log added , code 200', id: log.id });
+  });
+});
+
+//Read (Get All Logs)
+app.get('/activity_log', (req, res) => {
+  connection.query('SELECT * FROM activity_log', (err, results) => {
+    if (err) return res.status(500).send(err.message);
+    res.send(results);
+  });
+});
+
+//Read (Get One Log by ID)
+app.get('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query('SELECT * FROM activity_log WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    if (result.length === 0) return res.status(404).send('Log not found');
+    res.send(result[0]);
+  });
+});
+
+// Update activity log
+app.put('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  const updatedLog = req.body;
+  connection.query('UPDATE activity_log SET ? WHERE id = ?', [updatedLog, id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    res.send('Log updated');
+  });
+});
+
+//Delete activity log
+app.delete('/activity_log/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query('DELETE FROM activity_log WHERE id = ?', [id], (err, result) => {
+    if (err) return res.status(500).send(err.message);
+    res.send('Log deleted');
+  });
+});
+
+
 // handle graceful shutdown
 function shutdown() {
   server.close(() => {

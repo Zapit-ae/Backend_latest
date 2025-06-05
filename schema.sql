@@ -32,3 +32,16 @@ CREATE TABLE IF NOT EXISTS crypto_transaction (
   wallet_address VARCHAR(255),
   status VARCHAR(20)
 );
+
+CREATE TABLE IF NOT EXISTS activity_log (
+  id UUID PRIMARY KEY,
+  user_id UUID NOT NULL,
+  activity_type VARCHAR(50) NOT NULL,
+  transaction_id UUID,
+  description TEXT,
+  platform VARCHAR(20),
+  ip_address VARCHAR(45),
+  device_info TEXT,
+  location VARCHAR(255),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+); 
