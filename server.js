@@ -15,7 +15,7 @@ const app = express();
 const connection = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '',
+  password: process.env.DB_PASS || 'Akshat123',
   database: process.env.DB_NAME || 'zappit',
 });
 
@@ -220,3 +220,108 @@ function shutdown() {
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+// Create an RTA ticket
+app.post('/api/rta-ticket', (req, res) => {
+  const {
+    customeruu_id,
+    rta_route,
+    start_location,
+    end_location,
+    ticket_time,
+    transaction_id  
+  } = req.body;
+
+  const ticket_id = crypto.randomUUID();
+
+  const formattedTicketTime = ticket_time
+    ? ticket_time.replace('T', ' ').replace('Z', '')
+    : null;
+
+  connection.query(
+    `INSERT INTO rta_ticket 
+      (ticket_id, customeruu_id, rta_route, start_location, end_location, ticket_time, transaction_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [ticket_id, customeruu_id, rta_route, start_location, end_location, formattedTicketTime, transaction_id],
+    (err, result) => {
+      if (err) {
+        console.error('Error creating ticket:', err);
+        return res.status(500).json({ error: 420, message: 'Internal server error' });
+      }
+      res.status(201).json({ success: 200, message: 'RTA ticket created', ticket_id });
+    }
+  );
+});
+
+// Read all RTA tickets
+app.get('/api/rta-ticket', (req, res) => {
+  connection.query('SELECT * FROM rta_ticket', (err, results) => {
+    if (err) {
+      console.error('Error fetching RTA tickets:', err);
+      return res.status(500).json({ error: 420, message: 'Internal server error' });
+    }
+    res.status(200).json({ success: 200, message: 'RTA tickets fetched', data: results });
+  });
+});
+
+// Read one RTA ticket by ID
+app.get('/api/rta-ticket/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('SELECT * FROM rta_ticket WHERE ticket_id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Error fetching RTA ticket:', err);
+      return res.status(500).json({ error: 420, message: 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ error: 420, message: 'RTA ticket not found' });
+    }
+    res.status(200).json({ success: 200, message: 'RTA ticket fetched', data: results[0] });
+  });
+});
+
+// Update an RTA ticket by ID
+app.put('/api/rta-ticket/:ticket_id', (req, res) => {
+  const ticketId = req.params.ticket_id;
+  const { rta_route, start_location, end_location, ticket_time } = req.body;
+
+  let formattedTicketTime = null;
+  if (ticket_time) {
+    const dateObj = new Date(ticket_time);
+    if (isNaN(dateObj)) {
+      return res.status(400).json({ error: 420, message: "Invalid date format for ticket_time" });
+    }
+    formattedTicketTime = dateObj.toISOString().slice(0, 19).replace('T', ' ');
+  }
+
+  const sql = `
+    UPDATE rta_ticket
+    SET rta_route = ?, start_location = ?, end_location = ?, ticket_time = ?
+    WHERE ticket_id = ?
+  `;
+
+  connection.query(sql, [rta_route, start_location, end_location, formattedTicketTime, ticketId], (err, result) => {
+    if (err) {
+      console.error("Error updating RTA ticket:", err);
+      return res.status(500).json({ error: 420, message: "Database error while updating ticket" });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 420, message: "Ticket not found" });
+    }
+    res.json({ success: 200, message: "Ticket updated successfully" });
+  });
+});
+
+// Delete an RTA ticket by ID
+app.delete('/api/rta-ticket/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM rta_ticket WHERE ticket_id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting RTA ticket:', err);
+      return res.status(500).json({ error: 420, message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 420, message: 'RTA ticket not found' });
+    }
+    res.status(200).json({ success: 200, message: 'RTA ticket deleted successfully' });
+  });
+});
