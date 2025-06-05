@@ -17,6 +17,7 @@ const connection = mysql.createConnection({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || '',
   database: process.env.DB_NAME || 'zappit',
+  multipleStatements: true
 });
 
 connection.connect((err) => {
@@ -283,6 +284,88 @@ app.delete('/api/payment-method/:id', (req, res) => {
       return res.status(404).json({ message: 'Payment method not found' });
     }
     res.status(200).json({ message: 'Payment method deleted' });
+  });
+});
+
+// CREATE a QR code
+app.post('/api/qrcodes', (req, res) => {
+  const { qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type } = req.body;
+  connection.query(
+    'INSERT INTO qr_codes (qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type],
+    (err, result) => {
+      if (err) {
+        console.error('Error inserting QR code:', err);
+        return res.status(500).json({ status: '500', message: 'Internal server error' });
+      }
+      res.status(201).json({
+        status: '201',
+        qr_id: qr_id,
+        message: 'QR code created'
+      });
+    }
+  );
+});
+
+// READ all QR codes
+app.get('/api/qrcodes', (req, res) => {
+  connection.query('SELECT * FROM qr_codes', (err, results) => {
+    if (err) {
+      console.error('Error fetching QR codes:', err);
+      return res.status(500).json({ status: '500', message: 'Internal server error' });
+    }
+    res.status(200).json({ status: '200', results });
+  });
+});
+
+// READ one QR code by ID
+app.get('/api/qrcodes/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('SELECT * FROM qr_codes WHERE qr_id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Error fetching QR code:', err);
+      return res.status(500).json({ status: '500', message: 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ status: '404', message: 'QR code not found' });
+    }
+    res.status(200).json({ status: '200', qr_code: results[0] });
+  });
+});
+
+// UPDATE a QR code
+app.put('/api/qrcodes/:id', (req, res) => {
+  const { id } = req.params;
+  const { customer_uuid, status, merchant_id, amount, transaction_id, currency_type } = req.body;
+
+  connection.query(
+    'UPDATE qr_codes SET customer_uuid = ?, status = ?, merchant_id = ?, amount = ?, transaction_id = ?, currency_type = ? WHERE qr_id = ?',
+    [customer_uuid, status, merchant_id, amount, transaction_id, currency_type, id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating QR code:', err);
+        return res.status(500).json({ status: '500', message: 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ status: '404', message: 'QR code not found' });
+      }
+      res.status(200).json({ status: '200', message: 'QR code updated' });
+    }
+  );
+});
+
+// DELETE a QR code
+app.delete('/api/qrcodes/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM qr_codes WHERE qr_id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting QR code:', err);
+      return res.status(500).json({ status: '500', message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: '404', message: 'QR code not found' });
+    }
+    res.status(200).json({ status: '200', message: 'QR code deleted' });
   });
 });
 

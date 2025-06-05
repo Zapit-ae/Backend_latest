@@ -21,3 +21,25 @@ CREATE TABLE IF NOT EXISTS payment_method (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
+
+ CREATE TABLE IF NOT EXISTS merchants (
+    merchant_id BIGINT PRIMARY KEY NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    business_name VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+
+ CREATE TABLE IF NOT EXISTS qr_codes (
+    qr_id BIGINT PRIMARY KEY,
+    customer_uuid VARCHAR(36) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    merchant_id BIGINT NOT NULL,
+    amount NUMERIC(10, 2),
+    transaction_id BIGINT,
+    currency_type VARCHAR(10),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_uuid) REFERENCES customers(customer_uuid),
+    FOREIGN KEY (merchant_id) REFERENCES merchants(merchant_id),
+    FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
+     );
