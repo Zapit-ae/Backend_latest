@@ -464,6 +464,44 @@ app.delete('/activity_log/:id', (req, res) => {
 });
 
 
+// Create a new notification
+app.post('/notifications', (req, res) => {
+  const data = req.body;
+  data.notification_id = uuidv4(); // 👈 generate UUID
+  data.created_at = new Date();    // 👈 current timestamp
+
+  const sql = `INSERT INTO notification SET ?`;
+  connection.query(sql, data, (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).send({ message: "Notification added, code 200", id: data.notification_id, ...data });
+  });
+});
+
+// Get all notifications
+app.get('/notifications', (req, res) => {
+  connection.query('SELECT * FROM notification', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.send({ results, message: "code 200" });
+  });
+});
+
+// Update a notification
+app.put('/notifications/:id', (req, res) => {
+  connection.query('UPDATE notification SET ? WHERE notification_id = ?', [req.body, req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Notification updated successfully, code 200' });
+  });
+});
+
+// Delete a notification
+app.delete('/notifications/:id', (req, res) => {
+  connection.query('DELETE FROM notification WHERE notification_id = ?', [req.params.id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.send({ message: 'Notification deleted successfully, code 200' });
+  });
+});
+
+
 // handle graceful shutdown
 function shutdown() {
   server.close(() => {

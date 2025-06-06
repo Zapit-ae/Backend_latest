@@ -11,6 +11,15 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+CREATE TABLE IF NOT EXISTS notification (
+  notification_id CHAR(36) PRIMARY KEY,           -- UUID as primary key
+  customer_uuid CHAR(36),                         -- Regular UUID column (no FK constraint)
+  title VARCHAR(255),                             -- Notification title
+  message TEXT,                                   -- Notification content
+  type VARCHAR(20),                               -- 'transaction', 'promo', etc.
+  is_read BOOLEAN DEFAULT FALSE,                  -- Read/unread status
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Time of creation
+);
 CREATE TABLE IF NOT EXISTS rta_ticket (
   ticket_id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
   customeruu_id VARCHAR(36),
