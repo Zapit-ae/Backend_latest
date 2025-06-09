@@ -1,23 +1,12 @@
 import express from 'express';
-import mysql from 'mysql';
 import crypto from 'crypto';
-import dotenv from 'dotenv';
+import db from './db.js';
 
-dotenv.config();
-
-// read from schema.sql file
-import fs from 'fs';
-const schema = fs.readFileSync('schema.sql', 'utf8');
+db.runSchema();
 
 const app = express();
 
-const connection = mysql.createConnection({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || 'Akshat123',
-  database: process.env.DB_NAME || 'zappit',
-  multipleStatements: true
-});
+const connection = db.createConnection();
 
 connection.connect((err) => {
   if (err) {
@@ -27,18 +16,15 @@ connection.connect((err) => {
   }
 });
 
-
-connection.query(schema);
-
 app.use(express.json());
 
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
-  
+
   const hash = crypto.createHash('md5');
   hash.update(password);
   const hashedPassword = hash.digest('hex');
-  
+
   connection.query('SELECT uuid FROM users WHERE password=? AND email=?', [hashedPassword, email], (error, results, fields) => {
     if (error) {
       console.error('Error querying database:', error);
@@ -47,14 +33,14 @@ app.post('/api/login', (req, res) => {
         message: "Internal Server Error. Please try again later.",
       });
     }
-    
+
     if (results.length !== 1) {
       return res.status(404).send({
         status: 404,
         message: "No user with matching email and password found.",
       });
     }
-    
+
     return res.status(200).send({
       status: 200,
       message: "Login successful",
@@ -380,7 +366,7 @@ app.post('/crypto-transactions', (req, res) => {
   const sql = `INSERT INTO crypto_transaction SET ?`;
   connection.query(sql, data, (err, result) => {
     if (err) return res.status(500).send(err);
-    res.status(201).send({ message: "it is added, code 200",id: data.crypto_tx_id, ...data });
+    res.status(201).send({ message: "it is added, code 200", id: data.crypto_tx_id, ...data });
   });
 });
 
@@ -388,7 +374,7 @@ app.post('/crypto-transactions', (req, res) => {
 app.get('/crypto-transactions', (req, res) => {
   connection.query('SELECT * FROM crypto_transaction', (err, results) => {
     if (err) return res.status(500).send(err);
-    res.send({results, message: "code 200"});
+    res.send({ results, message: "code 200" });
   });
 });
 
@@ -419,10 +405,12 @@ app.post('/activity_log', (req, res) => {
   connection.query(sql, log, (err, result) => {
     if (err) return res.status(500).send({
       status: 500,
-      message: "Internal Server Error. Please try again later.",});
-    res.send({ 
-    Status: 200,
-    message: 'Activity log added , code 200', id: log.id });
+      message: "Internal Server Error. Please try again later.",
+    });
+    res.send({
+      Status: 200,
+      message: 'Activity log added , code 200', id: log.id
+    });
   });
 });
 
@@ -516,12 +504,12 @@ process.on('SIGTERM', shutdown);
 // Create an RTA ticket
 app.post('/api/rta-ticket', (req, res) => {
   const {
-    customeruu_id,
+    customer_uuid,
     rta_route,
     start_location,
     end_location,
     ticket_time,
-    transaction_id  
+    transaction_id
   } = req.body;
 
   const ticket_id = crypto.randomUUID();
@@ -532,9 +520,9 @@ app.post('/api/rta-ticket', (req, res) => {
 
   connection.query(
     `INSERT INTO rta_ticket 
-      (ticket_id, customeruu_id, rta_route, start_location, end_location, ticket_time, transaction_id)
+      (ticket_id, customer_uuid, rta_route, start_location, end_location, ticket_time, transaction_id)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [ticket_id, customeruu_id, rta_route, start_location, end_location, formattedTicketTime, transaction_id],
+    [ticket_id, customer_uuid, rta_route, start_location, end_location, formattedTicketTime, transaction_id],
     (err, result) => {
       if (err) {
         console.error('Error creating ticket:', err);
