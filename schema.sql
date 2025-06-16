@@ -117,3 +117,49 @@ CREATE TABLE IF NOT EXISTS activity_log (
   FOREIGN KEY (user_id) REFERENCES users(uuid),
   FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
 );
+
+CREATE TABLE IF NOT EXISTS support_ticket (
+  ticket_id INT AUTO_INCREMENT PRIMARY KEY,
+  customer_uuid VARCHAR(36),
+  subject VARCHAR(255) NOT NULL,
+  description TEXT,
+  status VARCHAR(20) DEFAULT 'open',
+  related_transaction_id VARCHAR(36),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid),
+  FOREIGN KEY (related_transaction_id) REFERENCES transactions(transaction_id)
+);
+
+CREATE TABLE IF NOT EXISTS referrals (
+  referral_id UUID PRIMARY KEY,
+  referrer_uuid VARCHAR(36) NOT NULL,
+  invite_code VARCHAR(255) NOT NULL,
+  referred_uuid VARCHAR(36),
+  bonus_given BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (referrer_uuid) REFERENCES users(uuid),
+  FOREIGN KEY (referred_uuid) REFERENCES users(uuid)
+);
+
+CREATE TABLE IF NOT EXISTS login_history (
+  login_id UUID PRIMARY KEY,
+  customer_uuid VARCHAR(36) NOT NULL,
+  platform VARCHAR(20),
+  ip_address VARCHAR(45),
+  device_info TEXT,
+  status VARCHAR(20),
+  logged_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+);
+
+CREATE TABLE IF NOT EXISTS feature_flags (
+  feature_name VARCHAR(100) PRIMARY KEY,
+  is_enabled BOOLEAN NOT NULL DEFAULT false,
+  customer_uuid VARCHAR(36),  -- Nullable, for personalized flags
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+);

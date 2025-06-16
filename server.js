@@ -191,20 +191,24 @@ app.delete('/api/transactions/:id', (req, res) => {
   );
 });
 
+
+// PAYMENT METHOD
 // CREATE a payment method
 app.post('/api/payment-method', (req, res) => {
   const { customer_uuid, type, label, details, is_active } = req.body;
+
   connection.query(
     'INSERT INTO payment_method (customer_uuid, type, label, details, is_active) VALUES (?, ?, ?, ?, ?)',
     [customer_uuid, type, label, JSON.stringify(details), is_active ?? true],
     (err, result) => {
       if (err) {
         console.error('Error inserting payment method:', err);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
       }
       res.status(201).json({
-        payment_id: result.insertId,
-        message: 'Payment method created'
+        status: 201,
+        message: 'Payment method created ✅',
+        data: { payment_id: result.insertId }
       });
     }
   );
@@ -215,24 +219,33 @@ app.get('/api/payment-method', (req, res) => {
   connection.query('SELECT * FROM payment_method', (err, results) => {
     if (err) {
       console.error('Error fetching payment methods:', err);
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
     }
-    res.status(200).json(results);
+    res.status(200).json({
+      status: 200,
+      message: 'Success ✅',
+      data: results
+    });
   });
 });
 
 // READ one payment method by ID
 app.get('/api/payment-method/:id', (req, res) => {
   const { id } = req.params;
+
   connection.query('SELECT * FROM payment_method WHERE payment_id = ?', [id], (err, results) => {
     if (err) {
       console.error('Error fetching payment method:', err);
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
     }
     if (results.length === 0) {
-      return res.status(404).json({ message: 'Payment method not found' });
+      return res.status(404).json({ status: 404, message: 'Payment method not found ❌' });
     }
-    res.status(200).json(results[0]);
+    res.status(200).json({
+      status: 200,
+      message: 'Success ✅',
+      data: results[0]
+    });
   });
 });
 
@@ -247,12 +260,15 @@ app.put('/api/payment-method/:id', (req, res) => {
     (err, result) => {
       if (err) {
         console.error('Error updating payment method:', err);
-        return res.status(500).json({ message: 'Internal server error' });
+        return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
       }
       if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Payment method not found' });
+        return res.status(404).json({ status: 404, message: 'Payment method not found ❌' });
       }
-      res.status(200).json({ message: 'Payment method updated' });
+      res.status(200).json({
+        status: 200,
+        message: 'Payment method updated ✅'
+      });
     }
   );
 });
@@ -260,17 +276,22 @@ app.put('/api/payment-method/:id', (req, res) => {
 // DELETE a payment method
 app.delete('/api/payment-method/:id', (req, res) => {
   const { id } = req.params;
+
   connection.query('DELETE FROM payment_method WHERE payment_id = ?', [id], (err, result) => {
     if (err) {
       console.error('Error deleting payment method:', err);
-      return res.status(500).json({ message: 'Internal server error' });
+      return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
     }
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Payment method not found' });
+      return res.status(404).json({ status: 404, message: 'Payment method not found ❌' });
     }
-    res.status(200).json({ message: 'Payment method deleted' });
+    res.status(200).json({
+      status: 200,
+      message: 'Payment method deleted ✅'
+    });
   });
 });
+
 
 // CREATE a QR code
 app.post('/api/qrcodes', (req, res) => {
@@ -490,17 +511,6 @@ app.delete('/notifications/:id', (req, res) => {
 });
 
 
-// handle graceful shutdown
-function shutdown() {
-  server.close(() => {
-    console.log('Server closed');
-  });
-  connection.end();
-}
-
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
-
 // Create an RTA ticket
 app.post('/api/rta-ticket', (req, res) => {
   const {
@@ -605,3 +615,301 @@ app.delete('/api/rta-ticket/:id', (req, res) => {
     res.status(200).json({ success: 200, message: 'RTA ticket deleted successfully' });
   });
 });
+
+
+// SUPPORT TICKET
+// CREATE Support Ticket
+app.post('/api/support-ticket', (req, res) => {
+  const { customer_uuid, subject, description, status, related_transaction_id } = req.body;
+  const query = `
+    INSERT INTO support_ticket 
+    (customer_uuid, subject, description, status, related_transaction_id) 
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  connection.query(
+    query,
+    [customer_uuid, subject, description, status || 'open', related_transaction_id || null],
+    (err, result) => {
+      if (err) return res.status(500).json({ status: 500, message: err.message });
+      res.status(200).json({
+        status: 200,
+        message: 'Support ticket created ✅',
+        data: { ticket_id: result.insertId }
+      });
+    }
+  );
+});
+
+// GET All Support Tickets
+app.get('/api/support-ticket', (req, res) => {
+  connection.query('SELECT * FROM support_ticket', (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    res.status(200).json({
+      status: 200,
+      message: 'Success ✅',
+      data: results
+    });
+  });
+});
+
+// GET Support Ticket by ID
+app.get('/api/support-ticket/:id', (req, res) => {
+  connection.query('SELECT * FROM support_ticket WHERE ticket_id = ?', [req.params.id], (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (results.length === 0) {
+      return res.status(404).json({ status: 404, message: 'Ticket not found ❌' });
+    }
+    res.status(200).json({
+      status: 200,
+      message: 'Success ✅',
+      data: results[0]
+    });
+  });
+});
+
+// UPDATE Support Ticket
+app.put('/api/support-ticket/:id', (req, res) => {
+  const { subject, description, status, related_transaction_id } = req.body;
+
+  const query = `
+    UPDATE support_ticket 
+    SET subject = ?, description = ?, status = ?, related_transaction_id = ? 
+    WHERE ticket_id = ?
+  `;
+
+  connection.query(
+    query,
+    [subject, description, status, related_transaction_id, req.params.id],
+    (err, result) => {
+      if (err) return res.status(500).json({ status: 500, message: err.message });
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ status: 404, message: 'Ticket not found ❌' });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'Support ticket updated ✅'
+      });
+    }
+  );
+});
+
+// DELETE Support Ticket
+app.delete('/api/support-ticket/:id', (req, res) => {
+  connection.query('DELETE FROM support_ticket WHERE ticket_id = ?', [req.params.id], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: 404, message: 'Ticket not found ❌' });
+    }
+    res.status(200).json({
+      status: 200,
+      message: 'Support ticket deleted ✅'
+    });
+  });
+});
+
+
+// REFERRALS
+// POST - Create Referral
+app.post('/api/referral', (req, res) => {
+  const { referrer_uuid, invite_code, referred_uuid, bonus_given } = req.body;
+  const referral_id = crypto.randomUUID();
+
+  const query = `
+    INSERT INTO referrals 
+    (referral_id, referrer_uuid, invite_code, referred_uuid, bonus_given) 
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  connection.query(query, [referral_id, referrer_uuid, invite_code, referred_uuid, bonus_given || false], (err) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    res.status(200).json({ status: 200, message: 'Referral created ✅', data: { referral_id } });
+  });
+});
+
+// GET - All Referrals
+app.get('/api/referral', (req, res) => {
+  connection.query('SELECT * FROM referrals', (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    res.status(200).json({ status: 200, message: 'Success ✅', data: results });
+  });
+});
+
+// GET - Referral by ID
+app.get('/api/referral/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'SELECT * FROM referrals WHERE referral_id = ?';
+
+  connection.query(query, [id], (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (results.length === 0) return res.status(404).json({ status: 404, message: 'Referral not found ❌' });
+    res.status(200).json({ status: 200, message: 'Success ✅', data: results[0] });
+  });
+});
+
+// PUT - Update Referral
+app.put('/api/referral/:id', (req, res) => {
+  const { id } = req.params;
+  const { bonus_given } = req.body;
+
+  const query = 'UPDATE referrals SET bonus_given = ? WHERE referral_id = ?';
+
+  connection.query(query, [bonus_given, id], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ status: 404, message: 'Referral not found ❌' });
+    res.status(200).json({ status: 200, message: 'Referral updated ✅' });
+  });
+});
+
+// DELETE - Delete Referral
+app.delete('/api/referral/:id', (req, res) => {
+  const { id } = req.params;
+  const query = 'DELETE FROM referrals WHERE referral_id = ?';
+
+  connection.query(query, [id], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ status: 404, message: 'Referral not found ❌' });
+    res.status(200).json({ status: 200, message: 'Referral deleted ✅' });
+  });
+});
+
+
+// LOGIN HISTORY
+// POST - Add Login History
+app.post('/api/login-history', (req, res) => {
+  const { customer_uuid, platform, ip_address, device_info, status } = req.body;
+  const login_id = crypto.randomUUID();
+
+  const query = `
+    INSERT INTO login_history 
+    (login_id, customer_uuid, platform, ip_address, device_info, status) 
+    VALUES (?, ?, ?, ?, ?, ?)
+  `;
+
+  connection.query(query, [login_id, customer_uuid, platform, ip_address, device_info, status || 'success'], (err) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    res.status(200).json({ status: 200, message: 'Login recorded ✅', data: { login_id } });
+  });
+});
+
+// GET - All Login History
+app.get('/api/login-history', (req, res) => {
+  connection.query('SELECT * FROM login_history', (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    res.status(200).json({ status: 200, message: 'Success ✅', data: results });
+  });
+});
+
+// GET - Login History by ID
+app.get('/api/login-history/:id', (req, res) => {
+  const { id } = req.params;
+
+  connection.query('SELECT * FROM login_history WHERE login_id = ?', [id], (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (results.length === 0) return res.status(404).json({ status: 404, message: 'Login not found ❌' });
+    res.status(200).json({ status: 200, message: 'Success ✅', data: results[0] });
+  });
+});
+
+// PUT - Update Login History Status
+app.put('/api/login-history/:id', (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) return res.status(400).json({ status: 400, message: 'Missing status in request body ❌' });
+
+  const query = 'UPDATE login_history SET status = ? WHERE login_id = ?';
+  connection.query(query, [status, id], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ status: 404, message: 'Login not found ❌' });
+    res.status(200).json({ status: 200, message: 'Login status updated ✅' });
+  });
+});
+
+// DELETE - Delete Login History by ID
+app.delete('/api/login-history/:id', (req, res) => {
+  const { id } = req.params;
+
+  connection.query('DELETE FROM login_history WHERE login_id = ?', [id], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ status: 404, message: 'Login not found ❌' });
+    res.status(200).json({ status: 200, message: 'Login deleted ✅' });
+  });
+});
+
+
+//FEATURE FLAGS
+// POST - Create a Feature Flag
+app.post('/api/feature-flag', (req, res) => {
+  const { feature_name, is_enabled, customer_uuid } = req.body;
+
+  const query = `
+    INSERT INTO feature_flags (feature_name, is_enabled, customer_uuid)
+    VALUES (?, ?, ?)
+  `;
+
+  connection.query(query, [feature_name, typeof is_enabled === 'boolean' ? is_enabled : false, customer_uuid || null], (err) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    res.status(200).json({ status: 200, message: 'Feature flag created ✅' });
+  });
+});
+
+// GET - All Feature Flags
+app.get('/api/feature-flag', (req, res) => {
+  connection.query('SELECT * FROM feature_flags', (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    res.status(200).json({ status: 200, message: 'Success ✅', data: results });
+  });
+});
+
+// GET - Feature Flag by Name
+app.get('/api/feature-flag/:name', (req, res) => {
+  const { name } = req.params;
+
+  connection.query('SELECT * FROM feature_flags WHERE feature_name = ?', [name], (err, results) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (results.length === 0) return res.status(404).json({ status: 404, message: 'Feature not found ❌' });
+    res.status(200).json({ status: 200, message: 'Success ✅', data: results[0] });
+  });
+});
+
+// PUT - Update Feature Flag
+app.put('/api/feature-flag/:name', (req, res) => {
+  const { name } = req.params;
+  const { is_enabled, customer_uuid } = req.body;
+
+  const query = `
+    UPDATE feature_flags 
+    SET is_enabled = ?, customer_uuid = ? 
+    WHERE feature_name = ?
+  `;
+
+  connection.query(query, [is_enabled, customer_uuid || null, name], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ status: 404, message: 'Feature not found ❌' });
+    res.status(200).json({ status: 200, message: 'Feature flag updated ✅' });
+  });
+});
+
+// DELETE - Delete Feature Flag
+app.delete('/api/feature-flag/:name', (req, res) => {
+  const { name } = req.params;
+
+  connection.query('DELETE FROM feature_flags WHERE feature_name = ?', [name], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: err.message });
+    if (result.affectedRows === 0) return res.status(404).json({ status: 404, message: 'Feature not found ❌' });
+    res.status(200).json({ status: 200, message: 'Feature flag deleted ✅' });
+  });
+});
+
+
+// handle graceful shutdown
+function shutdown() {
+  server.close(() => {
+    console.log('Server closed');
+  });
+  connection.end();
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
