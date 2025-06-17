@@ -194,3 +194,51 @@ CREATE TABLE IF NOT EXISTS feature_flags (
   
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
+
+CREATE TABLE IF NOT EXISTS settings (
+  customer_uuid CHAR(36) PRIMARY KEY,
+  language VARCHAR(10),
+  currency VARCHAR(10),
+  notifications_enabled BOOLEAN,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+);
+
+CREATE TABLE IF NOT EXISTS kyc_verification (
+  kyc_id CHAR(36) PRIMARY KEY,
+  customer_uuid CHAR(36),
+  document_type VARCHAR(50),
+  document_number VARCHAR(100),
+  status VARCHAR(20),
+  submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  verified_at TIMESTAMP NULL,
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+);
+
+CREATE TABLE IF NOT EXISTS exchange_rates (
+    rate_id CHAR(36) PRIMARY KEY,
+    base_currency VARCHAR(10),
+    target_currency VARCHAR(10),
+    rate NUMERIC(18,8),
+    source VARCHAR(255),
+    fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS feedback (
+    feedback_id     CHAR(36) PRIMARY KEY,         -- UUID
+    customer_uuid   CHAR(36),                     -- UUID of the customer (foreign key)
+    rating          INT CHECK (rating BETWEEN 1 AND 5),
+    comments        TEXT,
+    source          VARCHAR(100),
+    created_at      TIMESTAMP,
+    FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+);
+
+CREATE TABLE IF NOT EXISTS wallet (
+  wallet_id CHAR(36) PRIMARY KEY,
+  customer_uuid CHAR(36) NOT NULL,
+  type VARCHAR(10) CHECK (type IN ('fiat', 'crypto')),
+  currency VARCHAR(10) NOT NULL,
+  balance DECIMAL(18, 6) DEFAULT 0.0,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);

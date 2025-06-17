@@ -1009,6 +1009,329 @@ function shutdown() {
   });
   connection.end();
 }
+// Create new settings
+app.post('/api/settings', (req, res) => {
+  const { customer_uuid, language, currency, notifications_enabled } = req.body;
+  const query = `
+    INSERT INTO settings (customer_uuid, language, currency, notifications_enabled)
+    VALUES (?, ?, ?, ?)
+  `;
+  connection.query(query, [customer_uuid, language, currency, notifications_enabled], (err, results) => {
+    if (err) {
+      console.error('Error creating settings:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    res.status(200).json({ message: 'Settings created', id: customer_uuid });
+  });
+});
+
+// Read settings for a customer
+app.get('/api/settings/:uuid', (req, res) => {
+  const uuid = req.params.uuid;
+  connection.query('SELECT * FROM settings WHERE customer_uuid = ?', [uuid], (err, results) => {
+    if (err) {
+      console.error('Error fetching settings:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Settings not found' });
+    }
+    res.status(200).json(results[0]);
+  });
+});
+
+
+
+// Update settings
+app.put('/api/settings/:uuid', (req, res) => {
+  const uuid = req.params.uuid;
+  const { language, currency, notifications_enabled } = req.body;
+  const query = `
+    UPDATE settings
+    SET language = ?, currency = ?, notifications_enabled = ?
+    WHERE customer_uuid = ?
+  `;
+  connection.query(query, [language, currency, notifications_enabled, uuid], (err, results) => {
+    if (err) {
+      console.error('Error updating settings:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    res.status(200).json({ message: 'Settings updated' });
+  });
+});
+
+// Delete settings
+app.delete('/api/settings/:uuid', (req, res) => {
+  const uuid = req.params.uuid;
+  connection.query('DELETE FROM settings WHERE customer_uuid = ?', [uuid], (err, results) => {
+    if (err) {
+      console.error('Error deleting settings:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    res.status(200).json({ message: 'Settings deleted' });
+  });
+});
+
+ //======================= KYC =======================
+
+// CREATE
+app.post('/api/kyc', (req, res) => {
+  const { customer_uuid, document_type, document_number } = req.body;
+  const kyc_id = crypto.randomUUID();
+  const status = 'pending';
+
+  connection.query(
+    `INSERT INTO kyc_verification 
+     (kyc_id, customer_uuid, document_type, document_number, status) 
+     VALUES (?, ?, ?, ?, ?)`,
+    [kyc_id, customer_uuid, document_type, document_number, status],
+    (err) => {
+      if (err) return res.status(500).json({ message: 'Failed to insert KYC' });
+      res.status(200).json({ message: 'KYC submitted', kyc_id });
+    }
+  );
+});
+
+// READ ALL
+app.get('/api/kyc', (req, res) => {
+  connection.query('SELECT * FROM kyc_verification', (err, results) => {
+    if (err) return res.status(500).json({ message: 'Failed to fetch KYC data' });
+    res.status(200).json(results);
+  });
+});
+
+// READ ONE
+app.get('/api/kyc/:kyc_id', (req, res) => {
+  connection.query(
+    'SELECT * FROM kyc_verification WHERE kyc_id = ?',
+    [req.params.kyc_id],
+    (err, results) => {
+      if (err) return res.status(500).json({ message: 'Failed to fetch KYC record' });
+      if (results.length === 0) return res.status(404).json({ message: 'KYC not found' });
+      res.status(200).json(results[0]);
+    }
+  );
+});
+
+// UPDATE STATUS
+app.put('/api/kyc/:kyc_id', (req, res) => {
+  const { status } = req.body;
+  connection.query(
+    `UPDATE kyc_verification 
+     SET status=?, verified_at = CASE WHEN ? = 'approved' THEN CURRENT_TIMESTAMP ELSE NULL END 
+     WHERE kyc_id=?`,
+    [status, status, req.params.kyc_id],
+    (err) => {
+      if (err) return res.status(500).json({ message: 'Failed to update KYC' });
+      res.status(200).json({ message: 'KYC status updated' });
+    }
+  );
+});
+
+// DELETE
+app.delete('/api/kyc/:kyc_id', (req, res) => {
+  connection.query(
+    'DELETE FROM kyc_verification WHERE kyc_id = ?',
+    [req.params.kyc_id],
+    (err) => {
+      if (err) return res.status(500).json({ message: 'Failed to delete KYC record' });
+      res.status(200).json({ message: 'KYC record deleted' });
+    }
+  );
+});
+
+// CREATE - Add exchange rate
+app.post('/api/exchange_rates', (req, res) => {
+    const { base_currency, target_currency, rate, source} = req.body;
+    const rate_id = crypto.randomUUID();
+    const fetched_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const sql = `
+        INSERT INTO exchange_rates (rate_id, base_currency, target_currency, rate, source, fetched_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    const values = [rate_id, base_currency, target_currency, rate, source, fetched_at];
+
+    connection.query(sql, values, (err, result) => {
+    if (err) {
+        console.error(err);
+        return res.status(500).json({ error: err.message });
+    }
+    res.status(200).json({ message: 'Exchange rate inserted successfully' });
+});
+});
+
+
+// READ - Get all exchange rates
+app.get('/api/exchange_rates', (req, res) => {
+    connection.query('SELECT * FROM exchange_rates', (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(200).json(results);
+    });
+});
+
+
+// UPDATE - Update a specific exchange rate by ID
+app.put('/api/exchange_rates/:rate_id', (req, res) => {
+    const { rate_id } = req.params;
+    const { base_currency, target_currency, rate, source, fetched_at } = req.body;
+
+    const sql = `
+        UPDATE exchange_rates
+        SET base_currency = ?, target_currency = ?, rate = ?, source = ?, fetched_at = ?
+        WHERE rate_id = ?
+    `;
+    const values = [base_currency, target_currency, rate, source, fetched_at, rate_id];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Exchange rate not found' });
+        res.status(200).json({ message: 'Exchange rate updated successfully' });
+    });
+});
+
+
+// DELETE - Delete a specific exchange rate by ID
+app.delete('/api/exchange_rates/:rate_id', (req, res) => {
+    const { rate_id } = req.params;
+
+    connection.query('DELETE FROM exchange_rates WHERE rate_id = ?', [rate_id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Exchange rate not found' });
+        res.status(200).json({ message: 'Exchange rate deleted successfully' });
+    });
+});
+
+// CREATE - Add feedback
+app.post('/api/feedback', (req, res) => {
+    const { customer_uuid, rating, comments, source} = req.body;
+    const feedback_id = crypto.randomUUID();
+    const created_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    const sql = `
+        INSERT INTO feedback (feedback_id, customer_uuid, rating, comments, source, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    const values = [feedback_id, customer_uuid, rating, comments, source, created_at];
+
+    connection.query(sql, values, (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(200).json({ message: 'Feedback submitted successfully' });
+    }); 
+});
+
+// READ - Get all feedback entries
+app.get('/api/feedback', (req, res) => {
+    connection.query('SELECT * FROM feedback', (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.status(200).json(results);
+    });
+});
+
+// UPDATE - Update a specific feedback entry
+app.put('/api/feedback/:feedback_id', (req, res) => {
+    const { feedback_id } = req.params;
+    const { customer_uuid, rating, comments, source, created_at } = req.body;
+
+    const sql = `
+        UPDATE feedback
+        SET customer_uuid = ?, rating = ?, comments = ?, source = ?, created_at = ?
+        WHERE feedback_id = ?
+    `;
+    const values = [customer_uuid, rating, comments, source, created_at, feedback_id];
+
+    connection.query(sql, values, (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Feedback not found' });
+        res.status(200).json({ message: 'Feedback updated successfully' });
+    });
+});
+
+// DELETE - Delete a specific feedback entry
+app.delete('/api/feedback/:feedback_id', (req, res) => {
+    const { feedback_id } = req.params;
+
+    connection.query('DELETE FROM feedback WHERE feedback_id = ?', [feedback_id], (err, result) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (result.affectedRows === 0) return res.status(404).json({ message: 'Feedback not found' });
+        res.status(200).json({ message: 'Feedback deleted successfully' });
+    });
+});
+
+// CREATE a wallet
+app.post('/api/wallet', (req, res) => {
+  const { customer_uuid, type, currency, balance = 0.0 } = req.body;
+  const wallet_id = crypto.randomUUID();
+
+  connection.query(
+    'INSERT INTO wallet (wallet_id, customer_uuid, type, currency, balance) VALUES (?, ?, ?, ?, ?)',
+    [wallet_id, customer_uuid, type, currency, balance],
+    (err, result) => {
+      if (err) {
+        console.error('Error creating wallet:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      res.status(201).json({ wallet_id, message: 'Wallet created' });
+    }
+  );
+});
+
+// READ all wallets
+app.get('/api/wallet', (req, res) => {
+  connection.query('SELECT * FROM wallet', (err, results) => {
+    if (err) {
+      console.error('Error fetching wallets:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    res.status(200).json(results);
+  });
+});
+
+// READ wallet by ID
+app.get('/api/wallet/:id', (req, res) => {
+  connection.query('SELECT * FROM wallet WHERE wallet_id = ?', [req.params.id], (err, results) => {
+    if (err) {
+      console.error('Error fetching wallet:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ message: 'Wallet not found' });
+    }
+    res.status(200).json(results[0]);
+  });
+});
+
+// UPDATE a wallet
+app.put('/api/wallet/:id', (req, res) => {
+  const { type, currency, balance } = req.body;
+
+  connection.query(
+    'UPDATE wallet SET type = ?, currency = ?, balance = ?, updated_at = CURRENT_TIMESTAMP WHERE wallet_id = ?',
+    [type, currency, balance, req.params.id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating wallet:', err);
+        return res.status(500).json({ message: 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Wallet not found' });
+      }
+      res.status(200).json({ message: 'Wallet updated' });
+    }
+  );
+});
+
+// DELETE a wallet
+app.delete('/api/wallet/:id', (req, res) => {
+  connection.query('DELETE FROM wallet WHERE wallet_id = ?', [req.params.id], (err, result) => {
+    if (err) {
+      console.error('Error deleting wallet:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Wallet not found' });
+    }
+    res.status(200).json({ message: 'Wallet deleted' });
+  });
+});
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
