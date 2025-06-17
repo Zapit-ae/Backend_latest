@@ -903,6 +903,105 @@ app.delete('/api/feature-flag/:name', (req, res) => {
 });
 
 
+//EXTERNAL_API_LOGS
+// CREATE
+app.post('/external-api-logs', (req, res) => {
+  const data = {
+    log_id: uuidv4(),
+    ...req.body
+  };
+  connection.query('INSERT INTO external_api_logs SET ?', data, (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).json({status:201, message: 'success', log_id: data.log_id });
+  });
+});
+
+// READ
+app.get('/external-api-logs', (req, res) => {
+  connection.query('SELECT * FROM external_api_logs', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json(results);
+  });
+});
+
+// UPDATE
+app.put('/external-api-logs/:log_id', (req, res) => {
+  connection.query('UPDATE external_api_logs SET ? WHERE log_id = ?', [req.body, req.params.log_id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json({ status:200, message: 'success' });
+  });
+});
+
+// DELETE
+app.delete('/external-api-logs/:log_id', (req, res) => {
+  connection.query('DELETE FROM external_api_logs WHERE log_id = ?', [req.params.log_id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json({ status:200,  message: 'success' });
+  });
+});
+
+//error_logs
+app.post('/error-logs', (req, res) => {
+  const data = { error_id: uuidv4(), ...req.body };
+  connection.query('INSERT INTO error_logs SET ?', data, (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).json({  status:201, message: 'success', error_id: data.error_id });
+  });
+});
+
+app.get('/error-logs', (req, res) => {
+  connection.query('SELECT * FROM error_logs', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json(results);
+  });
+});
+
+app.put('/error-logs/:error_id', (req, res) => {
+  connection.query('UPDATE error_logs SET ? WHERE error_id = ?', [req.body, req.params.error_id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json({ status:200,  message: 'success' });
+  });
+});
+
+app.delete('/error-logs/:error_id', (req, res) => {
+  connection.query('DELETE FROM error_logs WHERE error_id = ?', [req.params.error_id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json({ status:200,  message: 'success' });
+  });
+});
+
+//device_status
+app.post('/device-status', (req, res) => {
+  const data = { device_id: uuidv4(), ...req.body };
+  connection.query('INSERT INTO device_status SET ?', data, (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(201).json({ status:201,  message: 'success', device_id: data.device_id });
+  });
+});
+
+app.get('/device-status', (req, res) => {
+  connection.query('SELECT * FROM device_status', (err, results) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json(results);
+  });
+});
+
+app.put('/device-status/:device_id', (req, res) => {
+  connection.query('UPDATE device_status SET ? WHERE device_id = ?', [req.body, req.params.device_id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json({  status:200, message: 'success' });
+  });
+});
+
+app.delete('/device-status/:device_id', (req, res) => {
+  connection.query('DELETE FROM device_status WHERE device_id = ?', [req.params.device_id], (err) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).json({ status:200,  message: 'success' });
+  });
+});
+
+
+
 // handle graceful shutdown
 function shutdown() {
   server.close(() => {

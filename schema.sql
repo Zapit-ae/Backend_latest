@@ -19,6 +19,37 @@ CREATE TABLE IF NOT EXISTS merchants (
   email VARCHAR(100) UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- external_api_logs table
+CREATE TABLE IF NOT EXISTS external_api_logs (
+    log_id UUID PRIMARY KEY,
+    provider VARCHAR(100),
+    endpoint TEXT,
+    request_body TEXT,
+    response_body TEXT,
+    status_code INT,
+    customer_uuid UUID NULL,
+    created_at TIMESTAMP
+);
+
+-- error_logs table
+CREATE TABLE IF NOT EXISTS error_logs (
+    error_id UUID PRIMARY KEY,
+    module VARCHAR(100),
+    error_message TEXT,
+    stack_trace TEXT,
+    customer_uuid UUID NULL,
+    created_at TIMESTAMP
+);
+
+-- device_status table
+CREATE TABLE IF NOT EXISTS device_status (
+    device_id UUID PRIMARY KEY,
+    customer_uuid UUID,
+    platform VARCHAR(50),
+    app_version VARCHAR(50),
+    os_version VARCHAR(50),
+    last_active_at TIMESTAMP
+);
 
 CREATE TABLE IF NOT EXISTS transactions (
   transaction_id UUID PRIMARY KEY DEFAULT (UUID()),
