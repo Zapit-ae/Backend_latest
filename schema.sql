@@ -12,6 +12,16 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS wallet (
+  wallet_id CHAR(36) PRIMARY KEY DEFAULT (UUID()),
+  customer_uuid UUID,
+  type VARCHAR(10) CHECK (type IN ('fiat', 'crypto')),
+  currency VARCHAR(10) NOT NULL,
+  balance DECIMAL(18, 6) DEFAULT 0.0,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+);
+
 CREATE TABLE IF NOT EXISTS merchants (
   merchant_id BIGINT PRIMARY KEY NOT NULL,
   name VARCHAR(100) NOT NULL,
@@ -19,26 +29,29 @@ CREATE TABLE IF NOT EXISTS merchants (
   email VARCHAR(100) UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 -- external_api_logs table
 CREATE TABLE IF NOT EXISTS external_api_logs (
-    log_id UUID PRIMARY KEY,
+    log_id UUID PRIMARY KEY DEFAULT (UUID()),
     provider VARCHAR(100),
     endpoint TEXT,
     request_body TEXT,
     response_body TEXT,
     status_code INT,
-    customer_uuid UUID NULL,
-    created_at TIMESTAMP
+    customer_uuid UUID,
+    created_at TIMESTAMP,
+    FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
 
 -- error_logs table
 CREATE TABLE IF NOT EXISTS error_logs (
-    error_id UUID PRIMARY KEY,
+    error_id UUID PRIMARY KEY DEFAULT (UUID()),
     module VARCHAR(100),
     error_message TEXT,
     stack_trace TEXT,
-    customer_uuid UUID NULL,
-    created_at TIMESTAMP
+    customer_uuid UUID,
+    created_at TIMESTAMP,
+    FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
 
 -- device_status table
@@ -63,7 +76,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   reference_id VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid),
   FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id)
 );
 
@@ -121,7 +134,7 @@ CREATE TABLE IF NOT EXISTS qr_codes (
 );
 
 CREATE TABLE IF NOT EXISTS crypto_transaction (
-  crypto_tx_id UUID PRIMARY KEY,
+  crypto_tx_id UUID PRIMARY KEY DEFAULT (UUID()),
   customer_uuid UUID NOT NULL,
   transaction_id UUID NOT NULL,
   tx_hash VARCHAR(255),
@@ -135,7 +148,7 @@ CREATE TABLE IF NOT EXISTS crypto_transaction (
 );
 
 CREATE TABLE IF NOT EXISTS activity_log (
-  id UUID PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT (UUID()),
   user_id UUID NOT NULL,
   activity_type VARCHAR(50) NOT NULL,
   transaction_id UUID NOT NULL,
@@ -152,11 +165,11 @@ CREATE TABLE IF NOT EXISTS activity_log (
 
 CREATE TABLE IF NOT EXISTS support_ticket (
   ticket_id INT AUTO_INCREMENT PRIMARY KEY,
-  customer_uuid VARCHAR(36),
+  customer_uuid UUID,
   subject VARCHAR(255) NOT NULL,
   description TEXT,
   status VARCHAR(20) DEFAULT 'open',
-  related_transaction_id VARCHAR(36),
+  related_transaction_id UUID,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid),
@@ -165,9 +178,9 @@ CREATE TABLE IF NOT EXISTS support_ticket (
 
 CREATE TABLE IF NOT EXISTS referrals (
   referral_id UUID PRIMARY KEY,
-  referrer_uuid VARCHAR(36) NOT NULL,
+  referrer_uuid UUID NOT NULL,
   invite_code VARCHAR(255) NOT NULL,
-  referred_uuid VARCHAR(36),
+  referred_uuid UUID,
   bonus_given BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -177,7 +190,7 @@ CREATE TABLE IF NOT EXISTS referrals (
 
 CREATE TABLE IF NOT EXISTS login_history (
   login_id UUID PRIMARY KEY,
-  customer_uuid VARCHAR(36) NOT NULL,
+  customer_uuid UUID NOT NULL,
   platform VARCHAR(20),
   ip_address VARCHAR(45),
   device_info TEXT,
@@ -190,14 +203,14 @@ CREATE TABLE IF NOT EXISTS login_history (
 CREATE TABLE IF NOT EXISTS feature_flags (
   feature_name VARCHAR(100) PRIMARY KEY,
   is_enabled BOOLEAN NOT NULL DEFAULT false,
-  customer_uuid VARCHAR(36),  -- Nullable, for personalized flags
+  customer_uuid UUID,  -- Nullable, for personalized flags
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
 
 CREATE TABLE IF NOT EXISTS settings (
-  customer_uuid CHAR(36) PRIMARY KEY,
+  customer_uuid UUID PRIMARY KEY,
   language VARCHAR(10),
   currency VARCHAR(10),
   notifications_enabled BOOLEAN,
@@ -207,7 +220,7 @@ CREATE TABLE IF NOT EXISTS settings (
 
 CREATE TABLE IF NOT EXISTS kyc_verification (
   kyc_id CHAR(36) PRIMARY KEY,
-  customer_uuid CHAR(36),
+  customer_uuid UUID,
   document_type VARCHAR(50),
   document_number VARCHAR(100),
   status VARCHAR(20),
@@ -227,7 +240,7 @@ CREATE TABLE IF NOT EXISTS exchange_rates (
 
 CREATE TABLE IF NOT EXISTS feedback (
     feedback_id     CHAR(36) PRIMARY KEY,         -- UUID
-    customer_uuid   CHAR(36),                     -- UUID of the customer (foreign key)
+    customer_uuid   UUID,                     -- UUID of the customer (foreign key)
     rating          INT CHECK (rating BETWEEN 1 AND 5),
     comments        TEXT,
     source          VARCHAR(100),
@@ -235,19 +248,9 @@ CREATE TABLE IF NOT EXISTS feedback (
     FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
 
-CREATE TABLE IF NOT EXISTS wallet (
-  wallet_id CHAR(36) PRIMARY KEY,
-  customer_uuid CHAR(36) NOT NULL,
-  type VARCHAR(10) CHECK (type IN ('fiat', 'crypto')),
-  currency VARCHAR(10) NOT NULL,
-  balance DECIMAL(18, 6) DEFAULT 0.0,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
-);
-
 CREATE TABLE IF NOT EXISTS session_token (
   token_id VARCHAR(36) PRIMARY KEY,
-  customer_uuid VARCHAR(36),
+  customer_uuid UUID,
   access_token TEXT NOT NULL,
   device_info TEXT,
   ip_address VARCHAR(45),
@@ -263,10 +266,10 @@ CREATE TABLE IF NOT EXISTS admin_action_logs (
   log_id VARCHAR(36) PRIMARY KEY,
   module VARCHAR(255) NOT NULL,
   action VARCHAR(50) NOT NULL,
-  performed_by VARCHAR(36) NOT NULL,
+  performed_by UUID NOT NULL,
   details TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  CONSTRAINT fk_performed_by FOREIGN KEY (performed_by) REFERENCES users(uuid) ON DELETE CASCADE ON UPDATE CASCADE
+  FOREIGN KEY (performed_by) REFERENCES users(uuid) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS offers (
@@ -284,7 +287,7 @@ CREATE TABLE IF NOT EXISTS offers (
 
 CREATE TABLE IF NOT EXISTS saved_locations (
   location_id VARCHAR(36) PRIMARY KEY,
-  customer_uuid VARCHAR(36),
+  customer_uuid UUID,
   label VARCHAR(255),
   latitude DECIMAL(10, 6),
   longitude DECIMAL(10, 6),
@@ -298,11 +301,12 @@ CREATE TABLE IF NOT EXISTS saved_locations (
 
 CREATE TABLE IF NOT EXISTS transactions_meta (
   meta_id VARCHAR(36) PRIMARY KEY,
-  transaction_id VARCHAR(36) NOT NULL,
+  transaction_id UUID NOT NULL,
   meta_key VARCHAR(255) NOT NULL,
   value TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (transaction_id) REFERENCES transaction(transaction_id)
+  FOREIGN KEY (transaction_id) REFERENCES transactions(transaction_id)
     ON DELETE CASCADE
     ON UPDATE CASCADE
+);

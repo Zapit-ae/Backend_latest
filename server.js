@@ -1,6 +1,7 @@
 import express from 'express';
 import crypto from 'crypto';
 import db from './db.js';
+import { v4 as uuidv4 } from 'uuid';
 
 db.runSchema();
 
@@ -119,82 +120,29 @@ app.get('/api/transactions/:id', (req, res) => {
   );
 });
 
-// PATCH (partially update) a transaction
-app.patch('/api/transactions/:id', (req, res) => {
-  const { id } = req.params;
-  const {
-    customer_uuid,
-    wallet_id,
-    type,
-    amount,
-    currency,
-    status,
-    provider,
-    reference_id
-  } = req.body;
+// PUT a transaction
+app.put('/api/transactions/:transaction_id', (req, res) => {
+  const { transaction_id } = req.params;
+  const updateFields = req.body;
 
-  const fields = [];
-  const values = [];
+  connection.query(
+    'UPDATE transactions SET ? WHERE transaction_id = ?',
+    [updateFields, transaction_id],
+    (err, result) => {
+      if (err) {
+        console.error('Update error:', err.sqlMessage || err);
+        return res.status(500).json({ status: 500, message: 'Internal server error' });
+      }
 
-  if (customer_uuid !== undefined) {
-    fields.push('customer_uuid = ?');
-    values.push(customer_uuid);
-  }
-  if (wallet_id !== undefined) {
-    fields.push('wallet_id = ?');
-    values.push(wallet_id);
-  }
-  if (type !== undefined) {
-    fields.push('type = ?');
-    values.push(type);
-  }
-  if (amount !== undefined) {
-    fields.push('amount = ?');
-    values.push(amount);
-  }
-  if (currency !== undefined) {
-    fields.push('currency = ?');
-    values.push(currency);
-  }
-  if (status !== undefined) {
-    fields.push('status = ?');
-    values.push(status);
-  }
-  if (provider !== undefined) {
-    fields.push('provider = ?');
-    values.push(provider);
-  }
-  if (reference_id !== undefined) {
-    fields.push('reference_id = ?');
-    values.push(reference_id);
-  }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ status: 404, message: 'Transaction not found' });
+      }
 
-  // Return an error if no fields are provided
-  if (!fields.length) {
-    return res.status(400).send({
-      status: 400,
-      message: 'No fields provided for update' });
-  }
-
-  const sql = `UPDATE transactions SET ${fields.join(', ')} WHERE transaction_id = ?`;
-  values.push(id);
-
-  connection.query(sql, values, (error, results) => {
-    if (error) {
-      return res.status(500).send({
-        status: 500,
-        message: 'Internal Server Error' });
+      res.status(200).json({ status: 200, message: 'Transaction updated' });
     }
-    if (results.affectedRows === 0) {
-      return res.status(404).send({
-        status: 404,
-        message: 'Transaction not found' });
-    }
-    return res.status(200).send({
-      status: 200,
-      message: 'Transaction updated' });
-  });
+  );
 });
+
 
 // DELETE a transaction
 app.delete('/api/transactions/:id', (req, res) => {
@@ -287,32 +235,28 @@ app.get('/api/payment-method/:id', (req, res) => {
 });
 
 // UPDATE a payment method
-app.put('/api/payment-method/:id', (req, res) => {
-  const { id } = req.params;
-  const { type, label, details, is_active } = req.body;
+app.put('/api/payment-method/:payment_id', (req, res) => {
+  const { payment_id } = req.params;
+  const updateFields = req.body;
 
   connection.query(
-    'UPDATE payment_method SET type = ?, label = ?, details = ?, is_active = ? WHERE payment_id = ?',
-    [type, label, JSON.stringify(details), is_active, id],
+    'UPDATE payment_method SET ? WHERE payment_id = ?',
+    [updateFields, payment_id],
     (err, result) => {
       if (err) {
-        console.error('Error updating payment method:', err);
-        return res.status(500).json({
-           status: 500,
-           message: 'Internal server error ❌' });
+        console.error('❌ SQL Error:', err); // Show exact MySQL error
+        return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
       }
+
       if (result.affectedRows === 0) {
-        return res.status(404).json({
-           status: 404,
-           message: 'Payment method not found ❌' });
+        return res.status(404).json({ status: 404, message: 'Payment method not found' });
       }
-      res.status(200).json({
-        status: 200,
-        message: 'Payment method updated ✅'
-      });
+
+      res.status(200).json({ status: 200, message: 'Payment method updated' });
     }
   );
 });
+
 
 // DELETE a payment method
 app.delete('/api/payment-method/:id', (req, res) => {
@@ -397,31 +341,28 @@ app.get('/api/qrcodes/:id', (req, res) => {
 });
 
 // UPDATE a QR code
-app.put('/api/qrcodes/:id', (req, res) => {
-  const { id } = req.params;
-  const { customer_uuid, status, merchant_id, amount, transaction_id, currency_type } = req.body;
+app.put('/api/qrcodes/:qr_id', (req, res) => {
+  const { qr_id } = req.params;
+  const updateFields = req.body;
 
   connection.query(
-    'UPDATE qr_codes SET customer_uuid = ?, status = ?, merchant_id = ?, amount = ?, transaction_id = ?, currency_type = ? WHERE qr_id = ?',
-    [customer_uuid, status, merchant_id, amount, transaction_id, currency_type, id],
+    'UPDATE qr_codes SET ? WHERE qr_id = ?',
+    [updateFields, qr_id],
     (err, result) => {
       if (err) {
-        console.error('Error updating QR code:', err);
-        return res.status(500).json({
-           status: '500',
-           message: 'Internal server error' });
+        console.error('❌ Error updating QR code:', err);
+        return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
       }
+
       if (result.affectedRows === 0) {
-        return res.status(404).json({
-           status: '404',
-           message: 'QR code not found' });
+        return res.status(404).json({ status: 404, message: 'QR code not found' });
       }
-      res.status(200).json({
-         status: '200',
-         message: 'QR code updated' });
+
+      res.status(200).json({ status: 200, message: 'QR code updated successfully' });
     }
   );
 });
+
 
 // DELETE a QR code
 app.delete('/api/qrcodes/:id', (req, res) => {
@@ -485,20 +426,27 @@ app.delete('/crypto-transactions/:id', (req, res) => {
 //activity_log
 // Create activity log 
 app.post('/activity_log', (req, res) => {
-  const log = req.body;
-  log.id = uuidv4();
-  const sql = 'INSERT INTO activity_log SET ?';
-  connection.query(sql, log, (err, result) => {
-    if (err) return res.status(500).send({
-      status: 500,
-      message: "Internal Server Error. Please try again later.",
-    });
-    res.send({
-      Status: 200,
-      message: 'Activity log added , code 200', id: log.id
+  const data = {
+    id: crypto.randomUUID(),
+    ...req.body,
+  };
+
+  connection.query('INSERT INTO activity_log SET ?', data, (err) => {
+    if (err) {
+      console.error("🔴 DB Error:", err);  // log the actual error
+      return res.status(500).json({
+        status: 500,
+        message: "Internal Server Error. Please try again later."
+      });
+    }
+    res.status(200).json({
+      status: 200,
+      message: "Activity log created",
+      id: data.id
     });
   });
 });
+
 
 //Read (Get All Logs)
 app.get('/activity_log', (req, res) => {
@@ -560,12 +508,29 @@ app.get('/notifications', (req, res) => {
 });
 
 // Update a notification
-app.put('/notifications/:id', (req, res) => {
-  connection.query('UPDATE notification SET ? WHERE notification_id = ?', [req.body, req.params.id], (err, result) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).send({ message: 'Notification updated successfully, code 200' });
-  });
+app.put('/notifications/:notification_id', (req, res) => {
+  const { notification_id } = req.params;
+  const updateFields = req.body;
+
+  connection.query(
+    'UPDATE notification SET ? WHERE notification_id = ?',
+    [updateFields, notification_id],
+    (err, result) => {
+      if (err) {
+        console.error('❌ SQL ERROR:', err); // This prints the real MySQL error
+        return res.status(500).json({ status: 500, message: 'Internal server error' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ status: 404, message: 'Notification not found' });
+      }
+
+      res.status(200).json({ status: 200, message: 'Notification updated' });
+    }
+  );
 });
+
+
 
 // Delete a notification
 app.delete('/notifications/:id', (req, res) => {
@@ -971,13 +936,32 @@ app.delete('/api/feature-flag/:name', (req, res) => {
 //EXTERNAL_API_LOGS
 // CREATE
 app.post('/external-api-logs', (req, res) => {
-  const data = {
-    log_id: uuidv4(),
-    ...req.body
-  };
-  connection.query('INSERT INTO external_api_logs SET ?', data, (err) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).json({status:201, message: 'success', log_id: data.log_id });
+  const data = { ...req.body };
+
+  connection.query('INSERT INTO external_api_logs SET ?', data, (err, result) => {
+    if (err) {
+      console.error('Error inserting log:', err.sqlMessage || err);
+      return res.status(500).json({
+        status: 500,
+        message: 'Internal server error'
+      });
+    }
+
+    // Fetch generated UUID back (if needed)
+    connection.query('SELECT log_id FROM external_api_logs WHERE ROW_COUNT() > 0 ORDER BY created_at DESC LIMIT 1', (err2, rows) => {
+      if (err2) {
+        return res.status(200).json({
+          status: 201,
+          message: 'Log created'
+        });
+      }
+
+      res.status(201).json({
+        status: 201,
+        message: 'Log created',
+        log_id: rows[0]?.log_id
+      });
+    });
   });
 });
 
@@ -1006,34 +990,58 @@ app.delete('/external-api-logs/:log_id', (req, res) => {
 });
 
 //error_logs
+// CREATE
 app.post('/error-logs', (req, res) => {
-  const data = { error_id: uuidv4(), ...req.body };
-  connection.query('INSERT INTO error_logs SET ?', data, (err) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).json({  status:200, message: 'success', error_id: data.error_id });
+  const data = { ...req.body };
+
+  connection.query('INSERT INTO error_logs SET ?', data, (err, result) => {
+    if (err) {
+      console.error('Insert Error:', err.sqlMessage || err);
+      return res.status(500).json({ status: 500, message: 'Internal server error' });
+    }
+
+    connection.query('SELECT error_id FROM error_logs ORDER BY created_at DESC LIMIT 1', (err2, rows) => {
+      if (err2 || !rows.length) {
+        return res.status(201).json({ status: 201, message: 'Log created' });
+      }
+      res.status(201).json({ status: 201, message: 'Log created', error_id: rows[0].error_id });
+    });
   });
 });
 
+// READ all
 app.get('/error-logs', (req, res) => {
   connection.query('SELECT * FROM error_logs', (err, results) => {
-    if (err) return res.status(500).send(err);
+    if (err) {
+      console.error('Fetch Error:', err.sqlMessage || err);
+      return res.status(500).json({ status: 500, message: 'Internal server error' });
+    }
     res.status(200).json(results);
   });
 });
 
+// UPDATE by ID
 app.put('/error-logs/:error_id', (req, res) => {
-  connection.query('UPDATE error_logs SET ? WHERE error_id = ?', [req.body, req.params.error_id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).json({ status:200,  message: 'success' });
+  connection.query('UPDATE error_logs SET ? WHERE error_id = ?', [req.body, req.params.error_id], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: 'Internal server error' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: 404, message: 'Error log not found' });
+    }
+    res.status(200).json({ status: 200, message: 'Log updated' });
   });
 });
 
+// DELETE by ID
 app.delete('/error-logs/:error_id', (req, res) => {
-  connection.query('DELETE FROM error_logs WHERE error_id = ?', [req.params.error_id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).json({ status:200,  message: 'success' });
+  connection.query('DELETE FROM error_logs WHERE error_id = ?', [req.params.error_id], (err, result) => {
+    if (err) return res.status(500).json({ status: 500, message: 'Internal server error' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ status: 404, message: 'Error log not found' });
+    }
+    res.status(200).json({ status: 200, message: 'Log deleted' });
   });
 });
+
 
 //device_status
 app.post('/device-status', (req, res) => {
@@ -1409,7 +1417,7 @@ app.post('/api/wallet', (req, res) => {
       res.status(200).json({
          status: 200, 
          wallet_id,
-         message: 'Wallet created' });
+         message: 'Wallet created'});
     }
   );
 });
