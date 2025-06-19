@@ -244,3 +244,65 @@ CREATE TABLE IF NOT EXISTS wallet (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
+
+CREATE TABLE IF NOT EXISTS session_token (
+  token_id VARCHAR(36) PRIMARY KEY,
+  customer_uuid VARCHAR(36),
+  access_token TEXT NOT NULL,
+  device_info TEXT,
+  ip_address VARCHAR(45),
+  expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS admin_action_logs (
+  log_id VARCHAR(36) PRIMARY KEY,
+  module VARCHAR(255) NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  performed_by VARCHAR(36) NOT NULL,
+  details TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_performed_by FOREIGN KEY (performed_by) REFERENCES users(uuid) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS offers (
+  offer_id VARCHAR(36) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  discount_type VARCHAR(50) CHECK (discount_type IN ('percent', 'flat')),
+  discount_value NUMERIC(10, 2) NOT NULL,
+  valid_from TIMESTAMP NOT NULL,
+  valid_to TIMESTAMP NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS saved_locations (
+  location_id VARCHAR(36) PRIMARY KEY,
+  customer_uuid VARCHAR(36),
+  label VARCHAR(255),
+  latitude DECIMAL(10, 6),
+  longitude DECIMAL(10, 6),
+  address TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS transactions_meta (
+  meta_id VARCHAR(36) PRIMARY KEY,
+  transaction_id VARCHAR(36) NOT NULL,
+  meta_key VARCHAR(255) NOT NULL,
+  value TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (transaction_id) REFERENCES transaction(transaction_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE

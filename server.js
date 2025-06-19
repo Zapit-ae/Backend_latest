@@ -1491,5 +1491,580 @@ app.delete('/api/wallet/:id', (req, res) => {
   });
 });
 
+// CREATE a session token
+app.post('/api/session-token', (req, res) => {
+  const { customer_uuid, access_token, expires_at } = req.body;
+
+  const token_id = crypto.randomUUID();
+  const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const device_info = req.headers['user-agent'];
+
+  connection.query(
+    `INSERT INTO session_token 
+     (token_id, customer_uuid, access_token, device_info, ip_address, expires_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [token_id, customer_uuid, access_token, device_info, ip_address, expires_at],
+    (err) => {
+      if (err) {
+        console.error('Error creating session token:', err);
+        return res.status(420).json({ "status" : "420" , "message" : 'Internal server error' });
+      }
+      res.status(200).json({
+        "status" : "200",
+        "message": 'Session token created',
+        "token_id": token_id
+      });
+    }
+  );
+});
+
+
+// READ all session tokens
+app.get('/api/session-token', (req, res) => {
+  connection.query('SELECT * FROM session_token', (err, results) => {
+    if (err) {
+      console.error('Error fetching session tokens:', err);
+      return res.status(420).json({"status" : "420", "message": 'Internal server error' });
+    }
+    res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" : results});
+  });
+});
+
+// READ one session token by ID
+app.get('/api/session-token/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('SELECT * FROM session_token WHERE token_id = ?', [id], (err, results) => {
+    if (err) {
+      console.error('Error fetching session token:', err);
+      return res.status(420).json({ "status" : "420", "message": 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({"status" : "404", "message": 'Session token not found' });
+    }
+    res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" : results[0]});
+  });
+});
+
+// UPDATE a session token
+app.put('/api/session-token/:id', (req, res) => {
+  const { id } = req.params;
+  const { access_token, expires_at } = req.body;
+
+  const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const device_info = req.headers['user-agent'];
+
+  connection.query(
+    `UPDATE session_token SET 
+      access_token = ?, 
+      device_info = ?, 
+      ip_address = ?, 
+      expires_at = ? 
+     WHERE token_id = ?`,
+    [access_token, device_info, ip_address, expires_at, id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating session token:', err);
+        return res.status(420).json({"status" : "420", "message": 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ "status" : "404","message": 'Session token not found' });
+      }
+      res.status(200).json({"status" : "200", "message" : 'Session token updated' });
+    }
+  );
+});
+
+
+// DELETE a session token
+app.delete('/api/session-token/:id', (req, res) => {
+  const { id } = req.params;
+  connection.query('DELETE FROM session_token WHERE token_id = ?', [id], (err, result) => {
+    if (err) {
+      console.error('Error deleting session token:', err);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Session token not found' });
+    }
+    res.status(200).json({ message: 'Session token deleted' });
+  });
+});
+
+// Create a new log entry
+app.post('/api/logs', (req, res) => {
+  const { module, action, performed_by, details } = req.body;
+
+  if (!module || !action || !performed_by) {
+    return res.status(400).send({
+      error: 400,
+      message: 'module, action and performed_by are required'
+    });
+  }
+
+  const log_id = crypto.randomUUID();
+
+  const query = `INSERT INTO admin_action_logs (log_id, module, action, performed_by, details) VALUES (?, ?, ?, ?, ?)`;
+
+  connection.query(query, [log_id, module, action, performed_by, details || null], (error) => {
+    if (error) {
+      console.error('Error inserting log:', error);
+      return res.status(420).json({ "status" : "420" , "message" : 'Internal server error' });
+      }
+      res.status(200).json({
+        "status" : "200",
+        "message": 'Log created',
+        "log_id": log_id});
+    }
+  );
+});
+
+// Get all logs
+app.get('/api/logs', (req, res) => {
+  connection.query('SELECT * FROM admin_action_logs ORDER BY created_at DESC', (error, results) => {
+    if (error) {
+      console.error('Error fetching logs:', error);
+      return res.status(420).send({ "status": 420, "message": 'Internal Server Error' });
+    }
+    res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" : results});
+  });
+});
+
+// Get log by id
+app.get('/api/logs/:log_id', (req, res) => {
+  const { log_id } = req.params;
+
+  connection.query('SELECT * FROM admin_action_logs WHERE log_id = ?', [log_id], (error, results) => {
+    if (error) {
+      console.error('Error fetching log:', error);
+      return res.status(42).send({ "status": 420, "message": 'Internal Server Error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).send({ "status": 404, "message": 'Log not found' });
+    }
+    res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" :results[0]});
+  });
+});
+
+// Update a log entry by log_id
+app.put('/api/logs/:log_id', (req, res) => {
+  const { log_id } = req.params;
+  const { module, action, performed_by, details } = req.body;
+
+  if (!module || !action || !performed_by) {
+    return res.status(400).send({
+      "status": 400,
+      "message": 'module, action and performed_by are required'
+    });
+  }
+
+  const query = `
+    UPDATE admin_action_logs
+    SET module = ?, action = ?, performed_by = ?, details = ?
+    WHERE log_id = ?
+  `;
+
+  connection.query(query, [module, action, performed_by, details || null, log_id], (error, results) => {
+    if (error) {
+      console.error('Error updating log:', error);
+      return res.status(420).send({ "status": 420 , "message" : 'Internal Server Error' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).send({ "error" : 404, "message" : 'Log not found' });
+    }
+    res.send({"status":200 ,"message": 'Log updated' });
+  });
+});
+
+
+// Delete log by id
+app.delete('/api/logs/:log_id', (req, res) => {
+  const { log_id } = req.params;
+
+  connection.query('DELETE FROM admin_action_logs WHERE log_id = ?', [log_id], (error, results) => {
+    if (error) {
+      console.error('Error deleting log:', error);
+      return res.status(420).send({ "status": 420, "status": 'Internal Server Error' });
+    }
+    if (results.affectedRows === 0) {
+      return res.status(404).send({ "status": 404, "message": 'Log not found' });
+    }
+    res.send({"status":200, "message": 'Log deleted' });
+  });
+});
+
+// CREATE Offer
+app.post('/api/offers', (req, res) => {
+  const {
+    title,
+    description,
+    discount_type,
+    discount_value,
+    valid_from,
+    valid_to,
+    is_active
+  } = req.body;
+
+  const offer_id = crypto.randomUUID();
+  // In JavaScript
+  const validFrom = new Date('2025-12-01T00:00:00Z').toISOString().slice(0, 19).replace('T', ' ');
+  const validTo = new Date('2025-12-31T23:59:59Z').toISOString().slice(0, 19).replace('T', ' ');
+
+  const query = `
+    INSERT INTO offers (
+      offer_id, title, description, discount_type,
+      discount_value, valid_from, valid_to, is_active
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  connection.query(
+    query,
+    [
+      offer_id,
+      title,
+      description,
+      discount_type,
+      discount_value,
+      validFrom,
+      validTo,
+      is_active ?? true
+    ],
+    (err) => {
+      if (err) {
+        console.error('Error inserting offer:', err);
+        return res.status(420).json({ "status" : "420" , "message" : 'Internal server error' });
+      }
+      res.status(200).json({
+        "status" : "200",
+        "message": 'Log created',
+        "offer_id": offer_id});
+    }
+  );
+});
+
+// READ All Offers
+app.get('/api/offers', (req, res) => {
+  connection.query('SELECT * FROM offers', (err, results) => {
+    if (err) {
+      console.error('Error fetching offers:', err);
+      return res.status(420).send({ "status": 420, "message": 'Failed to retrieve offers' });
+    }
+
+    return res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" :results});
+  });
+});
+
+// READ One Offer by ID
+app.get('/api/offers/:id', (req, res) => {
+  const offerId = req.params.id;
+
+  connection.query('SELECT * FROM offers WHERE offer_id = ?', [offerId], (err, results) => {
+    if (err) {
+      console.error('Error fetching offer:', err);
+      return res.status(420).send({ "status:": 420, "message": 'Failed to retrieve offer' });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).send({ "status": 404, "message": 'Offer not found' });
+    }
+
+    return res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" :results[0]});
+  });
+});
+
+// UPDATE Offer
+app.put('/api/offers/:id', (req, res) => {
+  const offerId = req.params.id;
+  const {
+    title,
+    description,
+    discount_type,
+    discount_value,
+    valid_from,
+    valid_to,
+    is_active
+  } = req.body;
+
+  const validFrom = new Date('2025-12-01T00:00:00Z').toISOString().slice(0, 19).replace('T', ' ');
+  const validTo = new Date('2025-12-31T23:59:59Z').toISOString().slice(0, 19).replace('T', ' ');
+  const query = `
+    UPDATE offers SET
+      title = ?, description = ?, discount_type = ?, discount_value = ?,
+      valid_from = ?, valid_to = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE offer_id = ?
+  `;
+
+  connection.query(
+    query,
+    [
+      title,
+      description,
+      discount_type,
+      discount_value,
+      validFrom,
+      validTo,
+      is_active,
+      offerId
+    ],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating offer:', err);
+        return res.status(420).send({ "status": 420, "message": 'Failed to update offer' });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).send({ "status": 404, "message": 'Offer not found' });
+      }
+
+      return res.status(200).send({ "status": 200, "message": 'Offer updated successfully' });
+    }
+  );
+});
+
+// DELETE Offer
+app.delete('/api/offers/:id', (req, res) => {
+  const offerId = req.params.id;
+
+  connection.query('DELETE FROM offers WHERE offer_id = ?', [offerId], (err, result) => {
+    if (err) {
+      console.error('Error deleting offer:', err);
+      return res.status(420).send({ "status": 420, "message": 'Failed to delete offer' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).send({ "status": 404, "message": 'Offer not found' });
+    }
+
+    return res.status(200).send({ "status": 200, "message": 'Offer deleted successfully' });
+  });
+});
+
+// ADD saved-location
+app.post('/api/saved-locations', (req, res) => {
+  const { customer_uuid, label, latitude, longitude, address } = req.body;
+
+  if (!customer_uuid || !label || latitude == null || longitude == null) {
+    return res.status(400).json({ "status": 400, "message": 'Missing required fields' });
+  }
+
+  const location_id = crypto.randomUUID();
+
+  connection.query(
+    `INSERT INTO saved_locations 
+    (location_id, customer_uuid, label, latitude, longitude, address) 
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [location_id, customer_uuid, label, latitude, longitude, address || null],
+    (err) => {
+      if (err) {
+        console.error('Error saving location:', err);
+        return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+      }
+      res.status(200).json({
+        "status": 200, "message": 'Location saved successfully',
+        "location id" : location_id,
+      });
+    }
+  );
+});
+
+// GET ALL saved-locations
+app.get('/api/saved-locations', (req, res) => {
+  const { customer_uuid } = req.query;
+
+  let query = 'SELECT * FROM saved_locations';
+  const params = [];
+
+  if (customer_uuid) {
+    query += ' WHERE customer_uuid = ?';
+    params.push(customer_uuid);
+  }
+
+  connection.query(query, params, (err, results) => {
+    if (err) {
+      console.error('Error fetching locations:', err);
+      return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+    }
+    res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" :results});
+  });
+});
+
+// GET location from location-id
+app.get('/api/saved-locations/:id', (req, res) => {
+  const { id } = req.params;
+
+  connection.query(
+    'SELECT * FROM saved_locations WHERE location_id = ?',
+    [id],
+    (err, results) => {
+      if (err) {
+        console.error('Error fetching location:', err);
+        return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({"status": 404, "message": 'Location not found' });
+      }
+      res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" :results[0]});
+    }
+  );
+});
+
+// UPDATE location
+app.put('/api/saved-locations/:id', (req, res) => {
+  const { id } = req.params;
+  const { label, latitude, longitude, address } = req.body;
+
+  connection.query(
+    `UPDATE saved_locations 
+     SET label = ?, latitude = ?, longitude = ?, address = ? 
+     WHERE location_id = ?`,
+    [label, latitude, longitude, address, id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating location:', err);
+        return res.status(420).json({ "status": 420, "message" :'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ "status": 404, "message": 'Location not found' });
+      }
+      res.status(200).json({ "status": 200, "message": 'Location updated' });
+    }
+  );
+});
+
+// DELETE location
+app.delete('/api/saved-locations/:id', (req, res) => {
+  const { id } = req.params;
+
+  connection.query(
+    'DELETE FROM saved_locations WHERE location_id = ?',
+    [id],
+    (err, result) => {
+      if (err) {
+        console.error('Error deleting location:', err);
+        return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ "status": 404, "message": 'Location not found' });
+      }
+      res.status(200).json({"status": 200, "message": 'Location deleted' });
+    }
+  );
+});
+
+// Add metadata to a transaction
+app.post('/api/transactions-meta', (req, res) => {
+  const meta_id = crypto.randomUUID();  // <-- Generate UUID here
+  const { transaction_id, meta_key, value } = req.body;
+
+  if (!transaction_id || !meta_key) {
+    return res.status(400).json({ "status": 400, "message": 'transaction_id and meta_key are required' });
+  }
+
+  const query = `
+    INSERT INTO transactions_meta (meta_id, transaction_id, meta_key, value)
+    VALUES (?, ?, ?, ?)
+  `;
+  connection.query(query, [meta_id, transaction_id, meta_key, value], (err, results) => {
+    if (err) {
+      console.error('Error inserting transaction meta:', err);
+      return res.status(420).json({ "status": 420, "message": err.message });
+    }
+    res.status(200).json({ "status": 200, "message": 'Meta created successfully', "meta id" : meta_id });
+  });
+});
+
+//Read all data from transactions_meta
+app.get('/api/transactions-meta', (req, res) => {
+  connection.query('SELECT * FROM transactions_meta', (err, results) => {
+    if (err) {
+      console.error('Error fetching transaction meta:', err);
+      return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+    }
+    res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" : results});
+  });
+});
+
+//Read transactions for specific meta_id
+app.get('/api/transactions-meta/:meta_id', (req, res) => {
+  const { meta_id } = req.params;
+
+  connection.query('SELECT * FROM transactions_meta WHERE meta_id = ?', [meta_id], (err, results) => {
+    if (err) {
+      console.error('Error fetching transaction meta:', err);
+      return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+    }
+    if (results.length === 0) {
+      return res.status(404).json({ "status": 404, "message": 'Transaction meta not found' });
+    }
+    res.status(200).json({
+      "status":"200",
+      "message": 'Successful',
+      "results" :results[0]});
+  });
+});
+
+//Update transactiona_id
+app.put('/api/transactions-meta/:meta_id', (req, res) => {
+  const { meta_id } = req.params;
+  const { meta_key, value } = req.body;
+
+  connection.query(
+    `UPDATE transactions_meta SET meta_key = ?, value = ? WHERE meta_id = ?`,
+    [meta_key, value, meta_id],
+    (err, result) => {
+      if (err) {
+        console.error('Error updating transaction meta:', err);
+        return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ "status": 404, "message": 'Transaction meta not found' });
+      }
+      res.status(200).json({ "status": 200, "message": 'Transaction meta updated successfully' });
+    }
+  );
+});
+
+//Delete transactions_meta data
+app.delete('/api/transactions-meta/:meta_id', (req, res) => {
+  const { meta_id } = req.params;
+
+  connection.query('DELETE FROM transactions_meta WHERE meta_id = ?', [meta_id], (err, result) => {
+    if (err) {
+      console.error('Error deleting transaction meta:', err);
+      return res.status(420).json({ "status": 420, "message": 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ "status": 404, "message": 'Transaction meta not found' });
+    }
+    res.status(200).json({ "status": 200, "message": 'Transaction meta deleted successfully' });
+  });
+});
+
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
