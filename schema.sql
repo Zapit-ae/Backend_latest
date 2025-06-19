@@ -64,6 +64,7 @@ CREATE TABLE IF NOT EXISTS transactions (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
+  FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id)
 );
 
 CREATE TABLE IF NOT EXISTS notification (
@@ -241,4 +242,5 @@ CREATE TABLE IF NOT EXISTS wallet (
   currency VARCHAR(10) NOT NULL,
   balance DECIMAL(18, 6) DEFAULT 0.0,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  FOREIGN KEY (customer_uuid) REFERENCES users(uuid)
 );
