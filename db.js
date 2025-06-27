@@ -20,7 +20,7 @@ function createConnection(allowMultipleStatements = false) {
 }
 
 function runSchema() {
-  const schema = fs.readFileSync('./schema.sql', 'utf8');
+  const schema = fs.readFileSync('./schema_latest.sql', 'utf8');
   const connection = createConnection(true);
   connection.connect((err) => {
     if (err) {

@@ -78,6 +78,10 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 CREATE TABLE IF NOT EXISTS notification (
   notification_id CHAR(36) PRIMARY KEY,
+  notification_time TIMESTAMP,
+  language VARCHAR(20),
+  feature_name VARCHAR(100),
+  notification_count INT,
   customer_uuid CHAR(36) NOT NULL,
   title VARCHAR(255),
   message TEXT,
@@ -155,6 +159,10 @@ CREATE TABLE IF NOT EXISTS activity_log (
 CREATE TABLE IF NOT EXISTS support_ticket (
   ticket_id INT AUTO_INCREMENT PRIMARY KEY,
   customer_uuid CHAR(36),
+  feedback VARCHAR(255),
+  ticket_type VARCHAR(20),
+  module VARCHAR(255),
+  time_take TIMESTAMP,
   subject VARCHAR(255) NOT NULL,
   description TEXT,
   status VARCHAR(20) DEFAULT 'open',
