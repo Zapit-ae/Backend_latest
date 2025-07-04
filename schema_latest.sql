@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS wallet (
 );
 
 CREATE TABLE IF NOT EXISTS merchants (
-  merchant_id BIGINT PRIMARY KEY NOT NULL,
+  merchant_id CHAR(36) PRIMARY KEY ,
   name VARCHAR(100) NOT NULL,
   business_name VARCHAR(100),
   email VARCHAR(100) UNIQUE,
@@ -116,13 +116,14 @@ CREATE TABLE IF NOT EXISTS payment_method (
 );
 
 CREATE TABLE IF NOT EXISTS qr_codes (
-  qr_id BIGINT PRIMARY KEY,
+  qr_id CHAR(36) PRIMARY KEY,
   customer_uuid CHAR(36) NOT NULL,
-  merchant_id BIGINT NOT NULL,
+  merchant_id CHAR(36) NOT NULL,
   transaction_id CHAR(36) NOT NULL,
   status VARCHAR(50) NOT NULL,
   amount NUMERIC(10, 2),
   currency_type VARCHAR(10),
+  qr_type VARCHAR(20),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid),
   FOREIGN KEY (merchant_id) REFERENCES merchants(merchant_id),
@@ -310,7 +311,7 @@ CREATE TABLE IF NOT EXISTS transactions_meta (
 );
 
 
-CREATE TABLE country_master (
+CREATE TABLE IF NOT EXISTS country_master (
     id INT PRIMARY KEY,
     iso_alpha2 VARCHAR(2),
     iso_alpha3 VARCHAR(3),

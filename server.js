@@ -283,107 +283,138 @@ app.delete('/api/payment-method/:id', (req, res) => {
 });
 
 
-// CREATE a QR code
+
+// ===============================
+// CREATE QR Code
+// ===============================
 app.post('/api/qrcodes', (req, res) => {
-  const { qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type } = req.body;
+  const {
+    customer_uuid,
+    status,
+    merchant_id,
+    amount,
+    transaction_id,
+    currency_type,
+    qr_type
+  } = req.body;
+
+  const qr_id = crypto.randomUUID();
+
   connection.query(
-    'INSERT INTO qr_codes (qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type],
-    (err, result) => {
+    `INSERT INTO qr_codes 
+     (qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type, qr_type)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [qr_id, customer_uuid, status, merchant_id, amount, transaction_id, currency_type, qr_type],
+    (err) => {
       if (err) {
-        console.error('Error inserting QR code:', err);
+        console.error('INSERT QR Code error:', err);
         return res.status(500).json({
-           status: '500',
-           message: 'Internal server error' });
+          status: 500,
+          message: 'Failed to create QR code'
+        });
       }
       res.status(200).json({
-        status: '200',
-        qr_id: qr_id,
-        message: 'QR code created'
+        status: 200,
+        message: 'QR code created',
+        qr_id
       });
     }
   );
 });
 
-// READ all QR codes
+// ===============================
+// READ ALL QR Codes
+// ===============================
 app.get('/api/qrcodes', (req, res) => {
-  connection.query('SELECT * FROM qr_codes', (err, results) => {
-    if (err) {
-      console.error('Error fetching QR codes:', err);
-      return res.status(500).json({
-         status: '500',
-         message: 'Internal server error' });
-    }
-    res.status(200).json({
-       status: '200',
-       results });
-  });
-});
-
-// READ one QR code by ID
-app.get('/api/qrcodes/:id', (req, res) => {
-  const { id } = req.params;
-  connection.query('SELECT * FROM qr_codes WHERE qr_id = ?', [id], (err, results) => {
-    if (err) {
-      console.error('Error fetching QR code:', err);
-      return res.status(500).json({
-         status: '500',
-         message: 'Internal server error' });
-    }
-    if (results.length === 0) {
-      return res.status(404).json({
-         status: '404',
-         message: 'QR code not found' });
-    }
-    res.status(200).json({
-      status: '200',
-      qr_code: results[0] });
-  });
-});
-
-// UPDATE a QR code
-app.put('/api/qrcodes/:qr_id', (req, res) => {
-  const { qr_id } = req.params;
-  const updateFields = req.body;
-
   connection.query(
-    'UPDATE qr_codes SET ? WHERE qr_id = ?',
-    [updateFields, qr_id],
-    (err, result) => {
+    'SELECT * FROM qr_codes',
+    (err, results) => {
       if (err) {
-        console.error('❌ Error updating QR code:', err);
-        return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
+        console.error('FETCH QR Codes error:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to fetch QR codes'
+        });
       }
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ status: 404, message: 'QR code not found' });
-      }
-
-      res.status(200).json({ status: 200, message: 'QR code updated successfully' });
+      res.status(200).json(results);
     }
   );
 });
 
+// ===============================
+// READ ONE QR Code
+// ===============================
+app.get('/api/qrcodes/:qr_id', (req, res) => {
+  connection.query(
+    'SELECT * FROM qr_codes WHERE qr_id = ?',
+    [req.params.qr_id],
+    (err, results) => {
+      if (err) {
+        console.error('FETCH QR Code error:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to fetch QR code'
+        });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: 'QR code not found'
+        });
+      }
+      res.status(200).json(results[0]);
+    }
+  );
+});
 
-// DELETE a QR code
-app.delete('/api/qrcodes/:id', (req, res) => {
-  const { id } = req.params;
-  connection.query('DELETE FROM qr_codes WHERE qr_id = ?', [id], (err, result) => {
-    if (err) {
-      console.error('Error deleting QR code:', err);
-      return res.status(500).json({
-         status: '500',
-         message: 'Internal server error' });
+// ===============================
+// UPDATE QR Code status + transaction_id
+// ===============================
+app.put('/api/qrcodes/:qr_id', (req, res) => {
+  const { status, transaction_id } = req.body;
+
+  connection.query(
+    `UPDATE qr_codes 
+     SET status = ?, transaction_id = ?
+     WHERE qr_id = ?`,
+    [status, transaction_id, req.params.qr_id],
+    (err) => {
+      if (err) {
+        console.error('UPDATE QR Code error:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to update QR code'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'QR code updated'
+      });
     }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-         status: '404',
-         message: 'QR code not found' });
+  );
+});
+
+// ===============================
+// DELETE QR Code
+// ===============================
+app.delete('/api/qrcodes/:qr_id', (req, res) => {
+  connection.query(
+    'DELETE FROM qr_codes WHERE qr_id = ?',
+    [req.params.qr_id],
+    (err) => {
+      if (err) {
+        console.error('DELETE QR Code error:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to delete QR code'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'QR code deleted'
+      });
     }
-    res.status(200).json({
-       status: '200',
-       message: 'QR code deleted' });
-  });
+  );
 });
 
 
@@ -954,111 +985,241 @@ app.delete('/api/feature-flag/:name', (req, res) => {
 
 //EXTERNAL_API_LOGS
 // CREATE
-app.post('/external-api-logs', (req, res) => {
-  const data = { ...req.body };
+app.post('/api/external-logs', (req, res) => {
+  const {
+    provider,
+    endpoint,
+    request_body,
+    response_body,
+    status_code,
+    customer_uuid
+  } = req.body;
 
-  connection.query('INSERT INTO external_api_logs SET ?', data, (err, result) => {
-    if (err) {
-      console.error('Error inserting log:', err.sqlMessage || err);
-      return res.status(500).json({
-        status: 500,
-        message: 'Internal server error'
-      });
-    }
+  const log_id = crypto.randomUUID();
 
-    // Fetch generated UUID back (if needed)
-    connection.query('SELECT log_id FROM external_api_logs WHERE ROW_COUNT() > 0 ORDER BY created_at DESC LIMIT 1', (err2, rows) => {
-      if (err2) {
-        return res.status(200).json({
-          status: 201,
-          message: 'Log created'
+  connection.query(
+    `INSERT INTO external_api_logs
+     (log_id, provider, endpoint, request_body, response_body, status_code, customer_uuid)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [log_id, provider, endpoint, request_body, response_body, status_code, customer_uuid],
+    (err) => {
+      if (err) {
+        console.error('INSERT external API log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to log external API call'
         });
       }
-
-      res.status(201).json({
-        status: 201,
-        message: 'Log created',
-        log_id: rows[0]?.log_id
+      res.status(200).json({
+        status: 200,
+        message: 'External API log created',
+        log_id
       });
-    });
-  });
+    }
+  );
 });
 
 // READ
-app.get('/external-api-logs', (req, res) => {
-  connection.query('SELECT * FROM external_api_logs', (err, results) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).json(results);
-  });
+app.get('/api/external-logs', (req, res) => {
+  connection.query(
+    'SELECT * FROM external_api_logs ORDER BY created_at DESC',
+    (err, results) => {
+      if (err) {
+        console.error('FETCH external API logs:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to fetch external API logs'
+        });
+      }
+      res.status(200).json(results);
+    }
+  );
 });
+
+app.get('/api/external-logs/:log_id', (req, res) => {
+  connection.query(
+    'SELECT * FROM external_api_logs WHERE log_id = ?',
+    [req.params.log_id],
+    (err, results) => {
+      if (err) {
+        console.error('FETCH external API log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to fetch external API log'
+        });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: 'External API log not found'
+        });
+      }
+      res.status(200).json(results[0]);
+    }
+  );
+});
+
 
 // UPDATE
-app.put('/external-api-logs/:log_id', (req, res) => {
-  connection.query('UPDATE external_api_logs SET ? WHERE log_id = ?', [req.body, req.params.log_id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).json({ status:200, message: 'success' });
-  });
+app.put('/api/external-logs/:log_id', (req, res) => {
+  const {
+    provider,
+    endpoint,
+    request_body,
+    response_body,
+    status_code,
+    customer_uuid
+  } = req.body;
+
+  connection.query(
+    `UPDATE external_api_logs
+     SET provider = ?,
+         endpoint = ?,
+         request_body = ?,
+         response_body = ?,
+         status_code = ?,
+         customer_uuid = ?
+     WHERE log_id = ?`,
+    [provider, endpoint, request_body, response_body, status_code, customer_uuid, req.params.log_id],
+    (err) => {
+      if (err) {
+        console.error('UPDATE external API log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to update external API log'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'External API log updated'
+      });
+    }
+  );
 });
 
+
 // DELETE
-app.delete('/external-api-logs/:log_id', (req, res) => {
-  connection.query('DELETE FROM external_api_logs WHERE log_id = ?', [req.params.log_id], (err) => {
-    if (err) return res.status(500).send(err);
-    res.status(200).json({ status:200,  message: 'success' });
-  });
+app.delete('/api/external-logs/:log_id', (req, res) => {
+  connection.query(
+    'DELETE FROM external_api_logs WHERE log_id = ?',
+    [req.params.log_id],
+    (err) => {
+      if (err) {
+        console.error('DELETE external API log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to delete external API log'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'External API log deleted'
+      });
+    }
+  );
 });
 
 //error_logs
-// CREATE
-app.post('/error-logs', (req, res) => {
-  const data = { ...req.body };
+app.post('/api/errors', (req, res) => {
+  const { module, error_message, stack_trace, customer_uuid } = req.body;
+  const error_id = crypto.randomUUID();
 
-  connection.query('INSERT INTO error_logs SET ?', data, (err, result) => {
-    if (err) {
-      console.error('Insert Error:', err.sqlMessage || err);
-      return res.status(500).json({ status: 500, message: 'Internal server error' });
-    }
-
-    connection.query('SELECT error_id FROM error_logs ORDER BY created_at DESC LIMIT 1', (err2, rows) => {
-      if (err2 || !rows.length) {
-        return res.status(201).json({ status: 200, message: 'Log created' });
+  connection.query(
+    `INSERT INTO error_logs 
+     (error_id, module, error_message, stack_trace, customer_uuid)
+     VALUES (?, ?, ?, ?, ?)`,
+    [error_id, module, error_message, stack_trace, customer_uuid],
+    (err) => {
+      if (err) {
+        console.error('INSERT error log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to log error'
+        });
       }
-      res.status(201).json({ status: 200, message: 'Log created', error_id: rows[0].error_id });
-    });
-  });
+      res.status(200).json({
+        status: 200,
+        message: 'Error logged',
+        error_id
+      });
+    }
+  );
+});
+app.get('/api/errors/:error_id', (req, res) => {
+  connection.query(
+    'SELECT * FROM error_logs WHERE error_id = ?',
+    [req.params.error_id],
+    (err, results) => {
+      if (err) {
+        console.error('FETCH error log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to fetch error log'
+        });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: 'Error log not found'
+        });
+      }
+      res.status(200).json(results[0]);
+    }
+  );
 });
 
-// READ all
-app.get('/error-logs', (req, res) => {
-  connection.query('SELECT * FROM error_logs', (err, results) => {
-    if (err) {
-      console.error('Fetch Error:', err.sqlMessage || err);
-      return res.status(500).json({ status: 500, message: 'Internal server error' });
+// ===============================
+// UPDATE error log by ID
+// ===============================
+app.put('/api/errors/:error_id', (req, res) => {
+  const { module, error_message, stack_trace, customer_uuid } = req.body;
+
+  connection.query(
+    `UPDATE error_logs 
+     SET module = ?, 
+         error_message = ?, 
+         stack_trace = ?, 
+         customer_uuid = ?
+     WHERE error_id = ?`,
+    [module, error_message, stack_trace, customer_uuid, req.params.error_id],
+    (err) => {
+      if (err) {
+        console.error('UPDATE error log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to update error log'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'Error log updated'
+      });
     }
-    res.status(200).json(results);
-  });
+  );
 });
 
-// UPDATE by ID
-app.put('/error-logs/:error_id', (req, res) => {
-  connection.query('UPDATE error_logs SET ? WHERE error_id = ?', [req.body, req.params.error_id], (err, result) => {
-    if (err) return res.status(500).json({ status: 500, message: 'Internal server error' });
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ status: 404, message: 'Error log not found' });
-    }
-    res.status(200).json({ status: 200, message: 'Log updated' });
-  });
-});
 
-// DELETE by ID
-app.delete('/error-logs/:error_id', (req, res) => {
-  connection.query('DELETE FROM error_logs WHERE error_id = ?', [req.params.error_id], (err, result) => {
-    if (err) return res.status(500).json({ status: 500, message: 'Internal server error' });
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ status: 404, message: 'Error log not found' });
+// ===============================
+// DELETE error log by ID
+// ===============================
+app.delete('/api/errors/:error_id', (req, res) => {
+  connection.query(
+    'DELETE FROM error_logs WHERE error_id = ?',
+    [req.params.error_id],
+    (err) => {
+      if (err) {
+        console.error('DELETE error log:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to delete error log'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'Error log deleted'
+      });
     }
-    res.status(200).json({ status: 200, message: 'Log deleted' });
-  });
+  );
 });
 
 
@@ -1265,6 +1426,105 @@ app.delete('/api/kyc/:kyc_id', (req, res) => {
     }
   );
 });
+
+
+// CREATE merchant
+app.post('/api/merchants', (req, res) => {
+  const { name, business_name, email } = req.body;
+  const merchant_id = crypto.randomUUID();
+
+  connection.query(
+    `INSERT INTO merchants 
+     (merchant_id, name, business_name, email) 
+     VALUES (?, ?, ?, ?)`,
+    [merchant_id, name, business_name, email],
+    (err) => {
+      if (err) {
+        console.error('INSERT error:', err);  // ✅ This will print the SQL error to your terminal!
+        return res.status(500).json({
+          status: 500,
+          message: 'Failed to create merchant'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'Merchant created',
+        merchant_id
+      });
+    }
+  );
+});
+
+// READ ALL merchants
+app.get('/api/merchants', (req, res) => {
+  connection.query('SELECT * FROM merchants', (err, results) => {
+    if (err) return res.status(500).json({
+      status: 500,
+      message: 'Failed to fetch merchants'
+    });
+    res.status(200).json(results);
+  });
+});
+
+// READ ONE merchant by ID
+app.get('/api/merchants/:merchant_id', (req, res) => {
+  connection.query(
+    'SELECT * FROM merchants WHERE merchant_id = ?',
+    [req.params.merchant_id],
+    (err, results) => {
+      if (err) return res.status(500).json({
+        status: 500,
+        message: 'Failed to fetch merchant'
+      });
+      if (results.length === 0) return res.status(404).json({
+        status: 404,
+        message: 'Merchant not found'
+      });
+      res.status(200).json(results[0]);
+    }
+  );
+});
+
+// UPDATE merchant (name, business_name, email)
+app.put('/api/merchants/:merchant_id', (req, res) => {
+  const { name, business_name, email } = req.body;
+
+  connection.query(
+    `UPDATE merchants 
+     SET name = ?, business_name = ?, email = ? 
+     WHERE merchant_id = ?`,
+    [name, business_name, email, req.params.merchant_id],
+    (err) => {
+      if (err) return res.status(500).json({
+        status: 500,
+        message: 'Failed to update merchant'
+      });
+      res.status(200).json({
+        status: 200,
+        message: 'Merchant updated'
+      });
+    }
+  );
+});
+
+// DELETE merchant
+app.delete('/api/merchants/:merchant_id', (req, res) => {
+  connection.query(
+    'DELETE FROM merchants WHERE merchant_id = ?',
+    [req.params.merchant_id],
+    (err) => {
+      if (err) return res.status(500).json({
+        status: 500,
+        message: 'Failed to delete merchant'
+      });
+      res.status(200).json({
+        status: 200,
+        message: 'Merchant deleted'
+      });
+    }
+  );
+});
+
 
 // CREATE - Add exchange rate
 app.post('/api/exchange_rates', (req, res) => {
