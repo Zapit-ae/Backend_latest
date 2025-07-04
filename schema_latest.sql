@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS transactions (
   transaction_id CHAR(36) PRIMARY KEY,
   customer_uuid CHAR(36) NOT NULL,
   wallet_id CHAR(36) NOT NULL,
+  reciever_id CHAR(36) NOT NULL,
+  reciever_wallet_id CHAR(36) NOT NULL,
   type VARCHAR(20),
   amount NUMERIC(18, 6) NOT NULL,
   currency VARCHAR(10) NOT NULL,
@@ -74,7 +76,9 @@ CREATE TABLE IF NOT EXISTS transactions (
   reference_id VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (customer_uuid) REFERENCES users(uuid),
-  FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id)
+  FOREIGN KEY (wallet_id) REFERENCES wallet(wallet_id),
+  FOREIGN KEY (reciever_id) REFERENCES users(uuid),
+  FOREIGN KEY (reciever_wallet_id) REFERENCES wallet(wallet_id)
 );
 
 CREATE TABLE IF NOT EXISTS notification (
@@ -106,6 +110,7 @@ CREATE TABLE IF NOT EXISTS rta_ticket (
 
 CREATE TABLE IF NOT EXISTS payment_method (
   payment_id INT AUTO_INCREMENT PRIMARY KEY,
+  payment_type VARCHAR(20) NOT NULL,
   customer_uuid CHAR(36),
   type VARCHAR(20) NOT NULL,
   label VARCHAR(255),

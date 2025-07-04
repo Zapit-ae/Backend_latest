@@ -56,10 +56,13 @@ app.post('/api/login', (req, res) => {
 });
 
 // CREATE a new transaction
+// CREATE transaction
 app.post('/api/transactions', (req, res) => {
   const {
     customer_uuid,
     wallet_id,
+    reciever_id,
+    reciever_wallet_id,
     type,
     amount,
     currency,
@@ -67,22 +70,33 @@ app.post('/api/transactions', (req, res) => {
     provider,
     reference_id,
   } = req.body;
-   const transaction_id = uuidv4(); // Generate UUID
+
+  const transaction_id = uuidv4(); // Generate UUID
 
   connection.query(
-    `INSERT INTO transactions
-      (transaction_id,customer_uuid, wallet_id, type, amount, currency, status, provider, reference_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING transaction_id`,
-    [transaction_id, customer_uuid, wallet_id, type, amount, currency, status, provider, reference_id],
+    `INSERT INTO transactions (
+      transaction_id, customer_uuid, wallet_id,
+      reciever_id, reciever_wallet_id,
+      type, amount, currency, status, provider, reference_id
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      transaction_id, customer_uuid, wallet_id,
+      reciever_id, reciever_wallet_id,
+      type, amount, currency, status, provider, reference_id
+    ],
     (error, results) => {
       if (error) {
+        console.error('Insert error:', error.sqlMessage || error);
         return res.status(500).send({
           status: 500,
-          message: 'Internal Server Error' });
+          message: 'Internal Server Error'
+        });
       }
       return res.status(200).send({
         status: 200,
-        message: 'Transaction created', transactionId: results[0].transaction_id });
+        message: 'Transaction created',
+        transaction_id
+      });
     }
   );
 });
@@ -93,13 +107,14 @@ app.get('/api/transactions', (req, res) => {
     if (error) {
       return res.status(500).send({
         status: 500,
-        message: 'Internal Server Error' });
+        message: 'Internal Server Error'
+      });
     }
     return res.status(200).json(results);
   });
 });
 
-// READ a single transaction
+// READ single transaction by ID
 app.get('/api/transactions/:id', (req, res) => {
   const { id } = req.params;
   connection.query(
@@ -109,19 +124,21 @@ app.get('/api/transactions/:id', (req, res) => {
       if (error) {
         return res.status(500).send({
           status: 500,
-          message: 'Internal Server Error' });
+          message: 'Internal Server Error'
+        });
       }
       if (results.length === 0) {
         return res.status(404).send({
           status: 404,
-          message: 'Transaction not found' });
+          message: 'Transaction not found'
+        });
       }
       return res.status(200).json(results[0]);
     }
   );
 });
 
-// PUT a transaction
+// UPDATE transaction by ID
 app.put('/api/transactions/:transaction_id', (req, res) => {
   const { transaction_id } = req.params;
   const updateFields = req.body;
@@ -132,20 +149,28 @@ app.put('/api/transactions/:transaction_id', (req, res) => {
     (err, result) => {
       if (err) {
         console.error('Update error:', err.sqlMessage || err);
-        return res.status(500).json({ status: 500, message: 'Internal server error' });
+        return res.status(500).json({
+          status: 500,
+          message: 'Internal Server Error'
+        });
       }
 
       if (result.affectedRows === 0) {
-        return res.status(404).json({ status: 404, message: 'Transaction not found' });
+        return res.status(404).json({
+          status: 404,
+          message: 'Transaction not found'
+        });
       }
 
-      res.status(200).json({ status: 200, message: 'Transaction updated' });
+      res.status(200).json({
+        status: 200,
+        message: 'Transaction updated'
+      });
     }
   );
 });
 
-
-// DELETE a transaction
+// DELETE transaction by ID
 app.delete('/api/transactions/:id', (req, res) => {
   const { id } = req.params;
   connection.query(
@@ -155,35 +180,53 @@ app.delete('/api/transactions/:id', (req, res) => {
       if (error) {
         return res.status(500).send({
           status: 500,
-          message: 'Internal Server Error' });
+          message: 'Internal Server Error'
+        });
       }
       if (results.affectedRows === 0) {
         return res.status(404).send({
           status: 404,
-          message: 'Transaction not found' });
+          message: 'Transaction not found'
+        });
       }
       return res.status(200).send({
         status: 200,
-        message: 'Transaction deleted' });
+        message: 'Transaction deleted'
+      });
     }
   );
 });
 
-
-// PAYMENT METHOD
 // CREATE a payment method
 app.post('/api/payment-method', (req, res) => {
-  const { customer_uuid, type, label, details, is_active } = req.body;
+  const {
+    customer_uuid,
+    payment_type,
+    type,      
+    label,
+    details,
+    is_active
+  } = req.body;
 
   connection.query(
-    'INSERT INTO payment_method (customer_uuid, type, label, details, is_active) VALUES (?, ?, ?, ?, ?)',
-    [customer_uuid, type, label, JSON.stringify(details), is_active ?? true],
+    `INSERT INTO payment_method (
+      customer_uuid, payment_type, type, label, details, is_active
+    ) VALUES (?, ?, ?, ?, ?, ?)`,
+    [
+      customer_uuid,
+      payment_type,
+      type,
+      label,
+      JSON.stringify(details),    // stringify for safety
+      is_active ?? true
+    ],
     (err, result) => {
       if (err) {
-        console.error('Error inserting payment method:', err);
+        console.error('❌ Error inserting payment method:', err);
         return res.status(500).json({
-           status: 500,
-           message: 'Internal server error ❌' });
+          status: 500,
+          message: 'Internal server error ❌'
+        });
       }
       res.status(200).json({
         status: 200,
@@ -198,10 +241,11 @@ app.post('/api/payment-method', (req, res) => {
 app.get('/api/payment-method', (req, res) => {
   connection.query('SELECT * FROM payment_method', (err, results) => {
     if (err) {
-      console.error('Error fetching payment methods:', err);
+      console.error('❌ Error fetching payment methods:', err);
       return res.status(500).json({
-         status: 500,
-         message: 'Internal server error ❌' });
+        status: 500,
+        message: 'Internal server error ❌'
+      });
     }
     res.status(200).json({
       status: 200,
@@ -215,24 +259,30 @@ app.get('/api/payment-method', (req, res) => {
 app.get('/api/payment-method/:id', (req, res) => {
   const { id } = req.params;
 
-  connection.query('SELECT * FROM payment_method WHERE payment_id = ?', [id], (err, results) => {
-    if (err) {
-      console.error('Error fetching payment method:', err);
-      return res.status(500).json({
-         status: 500,
-         message: 'Internal server error ❌' });
+  connection.query(
+    'SELECT * FROM payment_method WHERE payment_id = ?',
+    [id],
+    (err, results) => {
+      if (err) {
+        console.error('❌ Error fetching payment method:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Internal server error ❌'
+        });
+      }
+      if (results.length === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: 'Payment method not found ❌'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'Success ✅',
+        data: results[0]
+      });
     }
-    if (results.length === 0) {
-      return res.status(404).json({
-         status: 404,
-         message: 'Payment method not found ❌' });
-    }
-    res.status(200).json({
-      status: 200,
-      message: 'Success ✅',
-      data: results[0]
-    });
-  });
+  );
 });
 
 // UPDATE a payment method
@@ -240,46 +290,64 @@ app.put('/api/payment-method/:payment_id', (req, res) => {
   const { payment_id } = req.params;
   const updateFields = req.body;
 
+  if (updateFields.details) {
+    updateFields.details = JSON.stringify(updateFields.details);
+  }
+
   connection.query(
     'UPDATE payment_method SET ? WHERE payment_id = ?',
     [updateFields, payment_id],
     (err, result) => {
       if (err) {
-        console.error('❌ SQL Error:', err); // Show exact MySQL error
-        return res.status(500).json({ status: 500, message: 'Internal server error ❌' });
+        console.error('❌ SQL Error:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Internal server error ❌'
+        });
       }
 
       if (result.affectedRows === 0) {
-        return res.status(404).json({ status: 404, message: 'Payment method not found' });
+        return res.status(404).json({
+          status: 404,
+          message: 'Payment method not found ❌'
+        });
       }
 
-      res.status(200).json({ status: 200, message: 'Payment method updated' });
+      res.status(200).json({
+        status: 200,
+        message: 'Payment method updated ✅'
+      });
     }
   );
 });
-
 
 // DELETE a payment method
 app.delete('/api/payment-method/:id', (req, res) => {
   const { id } = req.params;
 
-  connection.query('DELETE FROM payment_method WHERE payment_id = ?', [id], (err, result) => {
-    if (err) {
-      console.error('Error deleting payment method:', err);
-      return res.status(500).json({
-         status: 500,
-         message: 'Internal server error ❌' });
+  connection.query(
+    'DELETE FROM payment_method WHERE payment_id = ?',
+    [id],
+    (err, result) => {
+      if (err) {
+        console.error('❌ Error deleting payment method:', err);
+        return res.status(500).json({
+          status: 500,
+          message: 'Internal server error ❌'
+        });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({
+          status: 404,
+          message: 'Payment method not found ❌'
+        });
+      }
+      res.status(200).json({
+        status: 200,
+        message: 'Payment method deleted ✅'
+      });
     }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({
-         status: 404,
-         message: 'Payment method not found ❌' });
-    }
-    res.status(200).json({
-      status: 200,
-      message: 'Payment method deleted ✅'
-    });
-  });
+  );
 });
 
 
