@@ -3,6 +3,15 @@ import crypto from 'crypto';
 import db from './db.js';
 import { v4 as uuidv4 } from 'uuid';
 
+//changes made 
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
+import terminalRoutes from './routes/terminals.js';
+import auditLogRoutes from './routes/audit_logs.js';
+import amlFlagRoutes from './routes/aml_flags.js';
+
+dotenv.config();
+
 db.runSchema();
 
 const app = express();
@@ -17,11 +26,18 @@ connection.connect((err) => {
   }
 });
 
+app.use(bodyParser.json());
 app.use(express.json());
 
+
+app.use('/api/terminals', terminalRoutes);
+app.use('/api/audit-logs', auditLogRoutes);
+app.use('/api/aml-flag', amlFlagRoutes);
+
+//done 
 const port = 8080;
 const server = app.listen(port,'0.0.0.0', () => {
-  console.log(`Server is running at http://64.227.156.143:${port}`);
+  console.log(`Server is running at http://localhost:${port}`);  //http://64.227.156.143:${port}`);
 }); 
 
 app.post('/api/login', (req, res) => {
