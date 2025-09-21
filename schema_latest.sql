@@ -579,3 +579,31 @@ INSERT INTO country_master (id, iso_alpha2, iso_alpha3, country_name, phone_code
 INSERT INTO country_master (id, iso_alpha2, iso_alpha3, country_name, phone_code, currency_code, currency_name, capital, region, subregion, flag_url) VALUES (247, 'ZA', 'ZAF', 'South Africa', '', '', '', '', '', '', 'https://flagcdn.com/za.svg');
 INSERT INTO country_master (id, iso_alpha2, iso_alpha3, country_name, phone_code, currency_code, currency_name, capital, region, subregion, flag_url) VALUES (248, 'ZM', 'ZMB', 'Zambia', '', '', '', '', '', '', 'https://flagcdn.com/zm.svg');
 INSERT INTO country_master (id, iso_alpha2, iso_alpha3, country_name, phone_code, currency_code, currency_name, capital, region, subregion, flag_url) VALUES (249, 'ZW', 'ZWE', 'Zimbabwe', '', '', '', '', '', '', 'https://flagcdn.com/zw.svg');
+
+CREATE TABLE terminals (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  merchant_id INT,
+  terminal_type VARCHAR(50),
+  qr_code VARCHAR(255),
+  device_id VARCHAR(100),
+  last_sync DATETIME,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE audit_logs (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  event_type VARCHAR(50),
+  actor VARCHAR(100),
+  timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+  ip_address VARCHAR(45),
+  payload TEXT
+);
+
+CREATE TABLE aml_flags (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  transaction_id INT,
+  reason_code VARCHAR(100),
+  severity VARCHAR(50),
+  reported_to VARCHAR(100)
+);
+
