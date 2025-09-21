@@ -1,0 +1,2746 @@
+{
+	"info": {
+		"_postman_id": "e36fca12-69cf-4c38-bc3c-f9f206915348",
+		"name": "zappit",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "46812478",
+		"_collection_link": "https://bebitasibi.postman.co/workspace/Benita-Sibi's-Workspace~33f40f91-2546-40c1-8a3f-d7207292936d/collection/46812478-e36fca12-69cf-4c38-bc3c-f9f206915348?action=share&source=collection_link&creator=46812478"
+	},
+	"item": [
+		{
+			"name": "login",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test1@example.com\",\n  \"password\": \"password\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "wallet",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\",\n  \"type\": \"fiat\",\n  \"currency\": \"USD\",\n  \"balance\": 100.50\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/wallet",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"wallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/wallet",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"wallet"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/wallet/40381fd3-3857-4a07-ac67-68832cc7e4a7",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"wallet",
+								"40381fd3-3857-4a07-ac67-68832cc7e4a7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"crypto\",\n  \"currency\": \"BTC\",\n  \"balance\": 0.75\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/wallet/6e48c39b-f274-4e48-ad16-c17a0a9efa87",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"wallet",
+								"6e48c39b-f274-4e48-ad16-c17a0a9efa87"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "external_api_logs",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"annie\",\n  \"endpoint\": \"/v1/data\",\n  \"request_body\": \"{ \\\"request\\\": \\\"payload\\\" }\",\n  \"response_body\": \"{ \\\"result\\\": \\\"ok\\\" }\",\n  \"status_code\": 200,\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\"\n}\n\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/external-logs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"external-logs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/external-api-logs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external-api-logs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status_code\": 500,\n  \"response_body\": \"{\\\"error\\\": \\\"Timeout\\\"}\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/external-api-logs/c25bacee-4ce8-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external-api-logs",
+								"c25bacee-4ce8-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status_code\": 500,\n  \"response_body\": \"{\\\"error\\\": \\\"Timeout\\\"}\"\n}\n"
+						},
+						"url": {
+							"raw": "{{base_url}}/external-api-logs/c25bacee-4ce8-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"external-api-logs",
+								"c25bacee-4ce8-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "error_logs",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"module\": \"wallet\",\n  \"error_message\": \"Something failed unexpectedly\",\n  \"stack_trace\": \"Optional: full stack trace here\",\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\"\n}\n\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/errors",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"errors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/error-logs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"error-logs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"error_message\": \"Updated message: null pointer exception in user module\",\n  \"stack_trace\": \"NullPointerException at user.service.js:90\",\n  \"module\": \"user-service\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/error-logs/f9ff6c67-4cee-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"error-logs",
+								"f9ff6c67-4cee-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/error-logs/f9ff6c67-4cee-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"error-logs",
+								"f9ff6c67-4cee-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "device_status",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\",\n  \"platform\": \"android\",\n  \"app_version\": \"2.3.1\",\n  \"os_version\": \"13\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/device-status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"device-status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"platform\": \"ios\",\n  \"app_version\": \"3.0.0\",\n  \"os_version\": \"17\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/device-status/cdad6245-866d-4e32-9c4e-1da6d2677fda",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"device-status",
+								"cdad6245-866d-4e32-9c4e-1da6d2677fda"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/device-status/0309cd73-019b-4955-9344-0f5c1bc6170a",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"device-status",
+								"0309cd73-019b-4955-9344-0f5c1bc6170a"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "transactions",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\",\n  \"wallet_id\": \"8b0dc5da-6b7d-48d3-b714-ced4ff6da0c0\",\n  \"type\": \"topup\",\n  \"amount\": 100.50,\n  \"currency\": \"USD\",\n  \"status\": \"success\",\n  \"provider\": \"annie\",\n  \"reference_id\": \"REF1234567890\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"failed\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions/37267d6a-4cf1-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"37267d6a-4cf1-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/transactions/37267d6a-4cf1-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"37267d6a-4cf1-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "notifications",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\",\n  \"title\": \"Transaction Alert\",\n  \"message\": \"Your payment of $200 was successful.\",\n  \"type\": \"transaction\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/notifications",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/notifications",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"notifications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"is_read\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/notifications/14a85852-ccde-4f74-8f64-0e92f2099eec",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"notifications",
+								"14a85852-ccde-4f74-8f64-0e92f2099eec"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/notifications/b78e6f70-6898-4328-9f6c-21ab15aca379",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"notifications",
+								"b78e6f70-6898-4328-9f6c-21ab15aca379"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "rta_ticket",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\",\n  \"rta_route\": \"Green Line 405\",\n  \"start_location\": \"Main Terminal\",\n  \"end_location\": \"Gate 12\",\n  \"ticket_time\": \"2025-06-19T16:00:00Z\",\n  \"transaction_id\": \"e1367a7f-5515-45b3-ac74-55a636650d4a\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rta-ticket",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rta-ticket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rta-ticket",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rta-ticket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"rta_route\": \"Updated Route X\",\n  \"start_location\": \"Stop A\",\n  \"end_location\": \"Stop B\",\n  \"ticket_time\": \"2025-06-20T10:15:00Z\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/rta-ticket/1af56ef4-ddbd-45e0-a3d1-63704ab0f258",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rta-ticket",
+								"1af56ef4-ddbd-45e0-a3d1-63704ab0f258"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/rta-ticket/1af56ef4-ddbd-45e0-a3d1-63704ab0f258",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"rta-ticket",
+								"1af56ef4-ddbd-45e0-a3d1-63704ab0f258"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payment_method",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\n  \"type\": \"upi\",\n  \"label\": \"My GPay\",\n  \"details\": \"user@okaxis\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/payment-method",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"payment-method"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/payment-method",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"payment-method"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"label\": \"Updated Label\",\n  \"is_active\": false\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/payment-method/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payment-method",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/payment-method/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"payment-method",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Settings",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"language\": \"EN\",\r\n  \"currency\": \"AED\",\r\n  \"notifications_enabled\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/settings",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"settings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/settings/940cf0a6-4cee-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"settings",
+								"940cf0a6-4cee-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"123g8567-e89b-12d3-a456-426614174000\",\r\n  \"language\": \"EN\",\r\n  \"currency\": \"AED\",\r\n  \"notifications_enabled\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/settings/940cf0a6-4cee-11f0-8d3d-d30dc6b94d57",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"settings",
+								"940cf0a6-4cee-11f0-8d3d-d30dc6b94d57"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/settings/c29b6343-4ff8-11f0-86a0-02ec595a7651",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"settings",
+								"c29b6343-4ff8-11f0-86a0-02ec595a7651"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "qr_codes",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"550e8400-e29b-41d4-a716-446655440022\",\n  \"merchant_id\": \"629b6770-6779-44fc-b060-1bb4522c1dde\",\n  \"transaction_id\": \"e1367a7f-5515-45b3-ac74-55a636650d4a\",\n  \"status\": \"active\",\n  \"amount\": 150.75,\n  \"currency_type\": \"INR\",\n  \"qr_type\": \"Static\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/qrcodes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"qrcodes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/qrcodes",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"qrcodes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"expired\",\n  \"amount\": 0.00\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/qrcodes/1001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"qrcodes",
+								"1001"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/qrcodes/1001",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"qrcodes",
+								"1001"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Kyc_verification",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"document_type\": \"passport\",\r\n  \"document_number\": \"P123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/kyc",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"kyc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/kyc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kyc"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": \"approved\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/kyc/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"kyc",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"123g8567-e89b-12d3-a456-426614174000\",\r\n  \"document_type\": \"passport\",\r\n  \"document_number\": \"P123456789\"\r\n}"
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/kyc/048a5e0b-5a83-42f3-a207-f1336fbd0f22",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"kyc",
+								"048a5e0b-5a83-42f3-a207-f1336fbd0f22"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Exchange_rates",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"base_currency\": \"USD\",\r\n  \"target_currency\": \"AED\",\r\n  \"rate\": 3.6725,\r\n  \"source\": \"central_bank\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/exchange_rates",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"exchange_rates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"123g8567-e89b-12d3-a456-426614174000\",\r\n  \"document_type\": \"passport\",\r\n  \"document_number\": \"P123456789\"\r\n}"
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/exchange_rates/",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"exchange_rates",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"rate_id\": \"76bde502-7a96-4408-a549-8955a8535639\",\r\n  \"base_currency\": \"USD\",\r\n  \"target_currency\": \"INR\",\r\n  \"rate\": 3.67250000,\r\n  \"source\": \"manual\",\r\n  \"fetched_at\": \"2025-06-16 10:45:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/exchange_rates/76bde502-7a96-4408-a549-8955a8535639",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"exchange_rates",
+								"76bde502-7a96-4408-a549-8955a8535639"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/exchange_rates/9250495e-24e9-43f3-9489-64541f15971c",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"exchange_rates",
+								"9250495e-24e9-43f3-9489-64541f15971c"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Feedback",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"rating\": 5,\r\n  \"comments\": \"Amazing service!\",\r\n  \"source\": \"website\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/feedback",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"feedback"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/feedback/",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"feedback",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"940cf0a6-4cee-11f0-8d3d-d30dc6b94d57\",\r\n  \"rating\": 5,\r\n  \"comments\": \"Great support service!\",\r\n  \"source\": \"supp\",\r\n  \"created_at\": \"2025-06-16 12:00:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/feedback/afad15b2-7efb-4f8b-a219-447d6bbb36b0",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"feedback",
+								"afad15b2-7efb-4f8b-a219-447d6bbb36b0"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/feedback/e122939b-04aa-4633-8529-165297b7a807",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"feedback",
+								"e122939b-04aa-4633-8529-165297b7a807"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "feature_flags",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"feature_name\": \"new_dashboard\",\r\n  \"is_enabled\": true,\r\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/feature-flag",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"feature-flag"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/feature-flag",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"feature-flag"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"is_enabled\": false,\r\n  \"customer_uuid\": \"123e4567-e89b-12d3-a456-426614174000\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/feature-flag/new_dashboard",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"feature-flag",
+								"new_dashboard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/feature-flag/new_dashboard",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"feature-flag",
+								"new_dashboard"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login history",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"platform\": \"Web\",\r\n  \"ip_address\": \"192.168.1.100\",\r\n  \"device_info\": \"Windows 10 - Chrome 114\",\r\n  \"status\": \"success\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/login-history",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"login-history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/login-history",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login-history"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": \"failed\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/login-history/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"login-history",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": \"failed\"\r\n}"
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/login-history/ce4bb57d-8b7f-4fa1-9bd5-201549e15b2e",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"login-history",
+								"ce4bb57d-8b7f-4fa1-9bd5-201549e15b2e"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "referrals",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"referrer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"invite_code\": \"INVITE2025\",\r\n  \"referred_uuid\": \"c29bdde1-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"bonus_given\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/referral",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"referral"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"referrer_uuid\": \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"invite_code\": \"INVITE2025\",\r\n  \"referred_uuid\": \"223e4567-e89b-12d3-a456-426614174001\",\r\n  \"bonus_given\": false\r\n}"
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/referral/e86a145a-2008-42b2-afab-8d2069fefb80",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"referral",
+								"e86a145a-2008-42b2-afab-8d2069fefb80"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"bonus_given\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/referral/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"referral",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"referrer_uuid\": \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"invite_code\": \"INVITE2025\",\r\n  \"referred_uuid\": \"223e4567-e89b-12d3-a456-426614174001\",\r\n  \"bonus_given\": false\r\n}"
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/referral/07921759-b58f-4839-8dad-5798ec30403a",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"referral",
+								"07921759-b58f-4839-8dad-5798ec30403a"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "support_ticket",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"subject\": \"Issue with withdrawal\",\r\n  \"description\": \"My withdrawal hasn't processed in 24 hours.\",\r\n  \"status\": \"open\",  \r\n  \"related_transaction_id\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/support-ticket",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"support-ticket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"123e4567-e89b-12d3-a456-426614174000\",\r\n  \"subject\": \"Issue with withdrawal\",\r\n  \"description\": \"My withdrawal hasn't processed in 24 hours.\",\r\n  \"status\": \"open\",  // optional; default is 'open'\r\n  \"related_transaction_id\": null\r\n}"
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/support-ticket",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"support-ticket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"subject\": \"Updated subject\",\r\n  \"description\": \"Updated description of the issue.\",\r\n  \"status\": \"resolved\",\r\n  \"related_transaction_id\": \"abc123xyz\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/support-ticket",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"support-ticket"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"subject\": \"Updated subject\",\r\n  \"description\": \"Updated description of the issue.\",\r\n  \"status\": \"resolved\",\r\n  \"related_transaction_id\": \"abc123xyz\"\r\n}"
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/support-ticket/1",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"support-ticket",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "activity_log",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"user_id\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"transaction_id\": \"21e541d5-4cf4-11f0-8d3d-d30dc6b94d57\",\r\n  \"activity_type\": \"payment\",\r\n  \"description\": \"User paid for ticket\",\r\n  \"platform\": \"web\",\r\n  \"ip_address\": \"103.21.244.1\",\r\n  \"device_info\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64)\",\r\n  \"location\": \"Mumbai, India\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/activity_log",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"activity_log"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activity_log",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity_log"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"activity_type\": \"User updated profile\",\r\n  \"platform\": \"mobile\",\r\n  \"created_at\": \"2025-06-17 16:00:00\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/activity_log/2f7cb0c5-5eeb-41ab-92c6-1cca31d13a2d",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity_log",
+								"2f7cb0c5-5eeb-41ab-92c6-1cca31d13a2d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/activity_log/2f7cb0c5-5eeb-41ab-92c6-1cca31d13a2d",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"activity_log",
+								"2f7cb0c5-5eeb-41ab-92c6-1cca31d13a2d"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "crypto_transaction",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\r\n  \"transaction_id\": \"21e541d5-4cf4-11f0-8d3d-d30dc6b94d57\",\r\n  \"tx_hash\": \"0xabc123def456\",\r\n  \"network\": \"Ethereum\",\r\n  \"crypto_type\": \"ETH\",\r\n  \"wallet_address\": \"0x9F4abc123DEF\",\r\n  \"status\": \"pending\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/crypto-transactions",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"crypto-transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/crypto-transactions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"crypto-transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": \"success\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/crypto-transactions/7fe6549e-0317-4531-a7ac-d2ee7c2600c6",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"crypto-transactions",
+								"7fe6549e-0317-4531-a7ac-d2ee7c2600c6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/crypto-transactions/7fe6549e-0317-4531-a7ac-d2ee7c2600c6",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"crypto-transactions",
+								"7fe6549e-0317-4531-a7ac-d2ee7c2600c6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "session_token",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"device_info\": \"Chrome on Windows 11\",\n  \"ip_address\": \"203.0.113.45\",\n  \"expires_at\": \"2025-07-01 12:00:00\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/session-token",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"session-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/session-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"session-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"access_token\": \"updated-token\",\n  \"expires_at\": \"2025-08-01 23:59:59\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/session-token/2242d9c7-9e9f-44b8-ae3b-0d6256be77af",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"session-token",
+								"2242d9c7-9e9f-44b8-ae3b-0d6256be77af"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/session-token/4bfda972-fd3f-4325-845a-8e057acaf48d",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"session-token",
+								"4bfda972-fd3f-4325-845a-8e057acaf48d"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "admin_action_logs",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"module\": \"User Management\",\n  \"action\": \"DELETE\",\n  \"performed_by\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\n  \"details\": \"Deleted user with UUID 9fa...12d\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/logs",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"logs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/logs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"logs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"module\": \"User Management\",\n  \"action\": \"DELETE\",\n  \"performed_by\": \"940cf0a6-4cee-11f0-8d3d-d30dc6b94d57\",\n  \"details\": \"Deleted user with UUID 9fa...12d\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/logs/d30ea281-10b8-4d59-a3e4-a7e26e53fa1b",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"logs",
+								"d30ea281-10b8-4d59-a3e4-a7e26e53fa1b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/logs/04366f84-3df1-4baa-97ea-dbe262140405",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"logs",
+								"04366f84-3df1-4baa-97ea-dbe262140405"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "offers",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Monsoon Offer\",\n  \"description\": \"Get 20% off on all rides\",\n  \"discount_type\": \"percent\",\n  \"offer_type\":\"Cashback\",\n  \"discount_value\": 20.00,\n  \"valid_from\": \"2025-06-20 00:00:00\",\n  \"valid_to\": \"2025-06-30 23:59:59\",\n  \"is_active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/offers",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"offers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/offers/325569ec-2c0f-47dd-888b-590f13d1bf04",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"offers",
+								"325569ec-2c0f-47dd-888b-590f13d1bf04"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Monsoon Offer\",\n  \"description\": \"Get 20% off on all rides\",\n  \"discount_type\": \"percent\",\n  \"discount_value\": 20.00,\n  \"valid_from\": \"2025-06-20 00:00:00\",\n  \"valid_to\": \"2025-06-30 23:59:59\",\n  \"is_active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/offers/20850f4f-9e27-4cc4-a5cb-0fab283a6ff6",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"offers",
+								"20850f4f-9e27-4cc4-a5cb-0fab283a6ff6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Monsoon Offer\",\n  \"description\": \"Get 20% off on all rides\",\n  \"discount_type\": \"percent\",\n  \"discount_value\": 20.00,\n  \"valid_from\": \"2025-06-20 00:00:00\",\n  \"valid_to\": \"2025-06-30 23:59:59\",\n  \"is_active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/offers/ce304fe8-7299-4097-8949-43905dbae376",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"offers",
+								"ce304fe8-7299-4097-8949-43905dbae376"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "saved_locations",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"c29b6343-4ff8-11f0-86a0-02ec595a7651\",\n  \"label\": \"Home\",\n  \"latitude\": 28.613939,\n  \"longitude\": 77.209023,\n  \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/saved-locations",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"saved-locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/saved-locations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"saved-locations"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"customer_uuid\": \"940cf0a6-4cee-11f0-8d3d-d30dc6b94d57\",\n  \"label\": \"Home\",\n  \"latitude\": 28.613939,\n  \"longitude\": 77.209023,\n  \"address\": \"Rajpath, India Gate, New Delhi, Delhi 110001\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/saved-locations/e172249b-3b67-4cce-9410-0e638c61d7b3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"saved-locations",
+								"e172249b-3b67-4cce-9410-0e638c61d7b3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/saved-locations/d7af316b-ee30-44fe-b6e0-52240f05bef3",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"saved-locations",
+								"d7af316b-ee30-44fe-b6e0-52240f05bef3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "transactions_meta",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transaction_id\": \"21e541d5-4cf4-11f0-8d3d-d30dc6b94d57\",\n  \"meta_key\": \"promo_applied\",\n  \"value\": \"NEWYEAR2025\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://64.227.156.143:8080/api/transactions-meta",
+							"protocol": "http",
+							"host": [
+								"64",
+								"227",
+								"156",
+								"143"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"transactions-meta"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/transactions-meta",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions-meta"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"transaction_id\": \"21e541d5-4cf4-11f0-8d3d-d30dc6b94d57\",\n  \"meta_key\": \"promo_applied\",\n  \"value\": \"NEWYEAR2025\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/api/transactions-meta/844023c9-da90-4ac6-84bb-5fa3bd0075a2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions-meta",
+								"844023c9-da90-4ac6-84bb-5fa3bd0075a2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/transactions-meta/844023c9-da90-4ac6-84bb-5fa3bd0075a2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"transactions-meta",
+								"844023c9-da90-4ac6-84bb-5fa3bd0075a2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Merchants",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"John Doe\",\r\n  \"business_name\": \"Doe Electronics\",\r\n  \"email\": \"test@example.com\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/merchants",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"merchants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseURL}}/api/merchants",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"merchants"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Jane Doe\",\r\n  \"business_name\": \"Doe Tech\",\r\n  \"email\": \"jane@doe.com\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/merchants/629b6770-6779-44fc-b060-1bb4522c1dde",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"merchants",
+								"629b6770-6779-44fc-b060-1bb4522c1dde"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Jane Doe\",\r\n  \"business_name\": \"Doe Tech\",\r\n  \"email\": \"jane@doe.com\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "{{baseURL}}/api/merchants/629b6770-6779-44fc-b060-1bb4522c1dde",
+							"host": [
+								"{{baseURL}}"
+							],
+							"path": [
+								"api",
+								"merchants",
+								"629b6770-6779-44fc-b060-1bb4522c1dde"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "static qr",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseURL",
+			"value": "http://localhost:8080",
+			"type": "default",
+			"disabled": true
+		},
+		{
+			"key": "base_url",
+			"value": "http://64.227.156.143:8080",
+			"type": "string"
+		}
+	]
+}
